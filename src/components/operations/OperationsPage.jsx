@@ -2,11 +2,30 @@ import { useState } from 'react';
 import { useOperations } from '../../contexts/OperationsContext';
 import ChecklistsManager from './ChecklistsManager';
 import LabsTracker from './LabsTracker';
+import SnippetsManager from './SnippetsManager';
 import './OperationsPage.css';
 
 const OperationsPage = () => {
   const { checklists, labs } = useOperations();
   const [activeTab, setActiveTab] = useState('checklists');
+
+  // Count total snippets from all sections
+  const getSnippetCount = () => {
+    try {
+      const saved = localStorage.getItem('hd-snippet-configs');
+      if (saved) {
+        const configs = JSON.parse(saved);
+        return configs.reduce((total, config) => {
+          return total + (config.sections?.reduce((sectionTotal, section) => {
+            return sectionTotal + (section.snippets?.length || 0);
+          }, 0) || 0);
+        }, 0);
+      }
+    } catch (e) {
+      return 0;
+    }
+    return 0;
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -14,6 +33,8 @@ const OperationsPage = () => {
         return <ChecklistsManager />;
       case 'labs':
         return <LabsTracker />;
+      case 'snippets':
+        return <SnippetsManager />;
       default:
         return <ChecklistsManager />;
     }
@@ -42,6 +63,14 @@ const OperationsPage = () => {
           <span className="ops-tab-icon">🧪</span>
           <span className="ops-tab-label">Labs</span>
           <span className="ops-tab-count">{labs.length}</span>
+        </button>
+        <button
+          className={`ops-tab ${activeTab === 'snippets' ? 'active' : ''}`}
+          onClick={() => setActiveTab('snippets')}
+        >
+          <span className="ops-tab-icon">✂️</span>
+          <span className="ops-tab-label">Snippets</span>
+          <span className="ops-tab-count">{getSnippetCount()}</span>
         </button>
       </div>
 
