@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useOperations } from '../../contexts/OperationsContext';
 import ChecklistsManager from './ChecklistsManager';
 import LabsTracker from './LabsTracker';
-import SnippetsManager from './SnippetsManager';
 import './OperationsPage.css';
 
 const OperationsPage = () => {
@@ -15,8 +14,6 @@ const OperationsPage = () => {
         return <ChecklistsManager />;
       case 'labs':
         return <LabsTracker />;
-      case 'snippets':
-        return <SnippetsManager />;
       default:
         return <ChecklistsManager />;
     }
@@ -26,7 +23,7 @@ const OperationsPage = () => {
     <div className="operations-page active">
       <div className="ops-header">
         <h1 className="ops-title">Operations Management</h1>
-        <p className="ops-subtitle">Manage checklists, labs, and snippets for daily operations</p>
+        <p className="ops-subtitle">Manage checklists and labs for daily operations</p>
       </div>
 
       <div className="ops-tabs">
@@ -45,13 +42,6 @@ const OperationsPage = () => {
           <span className="ops-tab-icon">🧪</span>
           <span className="ops-tab-label">Labs</span>
           <span className="ops-tab-count">{labs.length}</span>
-        </button>
-        <button
-          className={`ops-tab ${activeTab === 'snippets' ? 'active' : ''}`}
-          onClick={() => setActiveTab('snippets')}
-        >
-          <span className="ops-tab-icon">📝</span>
-          <span className="ops-tab-label">Snippets</span>
         </button>
       </div>
 

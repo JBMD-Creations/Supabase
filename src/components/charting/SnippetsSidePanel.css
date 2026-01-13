@@ -1,0 +1,255 @@
+/* Overlay for mobile */
+.snippets-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .snippets-overlay {
+    display: block;
+  }
+}
+
+/* Side Panel */
+.snippets-side-panel {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 400px;
+  height: 100vh;
+  background: white;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  transition: right 0.3s ease;
+}
+
+.snippets-side-panel.open {
+  right: 0;
+}
+
+/* Header */
+.snippets-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 2px solid #e5e7eb;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+}
+
+.snippets-panel-header h3 {
+  margin: 0 0 4px 0;
+  color: #1e40af;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.snippets-panel-subtitle {
+  margin: 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.snippets-close-btn {
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 32px;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.snippets-close-btn:hover {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+/* Content */
+.snippets-panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+/* Snippet Section */
+.snippet-section-panel {
+  margin-bottom: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.section-header-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: #f9fafb;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 600;
+  color: #374151;
+}
+
+.section-header-btn:hover {
+  background: #f3f4f6;
+}
+
+.section-icon {
+  font-size: 20px;
+}
+
+.section-name {
+  flex: 1;
+  text-align: left;
+  font-size: 15px;
+}
+
+.section-count {
+  padding: 4px 8px;
+  background: #e5e7eb;
+  color: #6b7280;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.section-arrow {
+  font-size: 12px;
+  color: #9ca3af;
+  transition: transform 0.2s;
+}
+
+.section-arrow.expanded {
+  transform: rotate(180deg);
+}
+
+/* Snippets List */
+.snippets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  background: white;
+}
+
+.snippet-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  font-size: 14px;
+  color: #374151;
+}
+
+.snippet-item:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  transform: translateX(-2px);
+}
+
+.snippet-item.copied {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+.snippet-text {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.copied-badge {
+  color: #22c55e;
+  font-weight: 700;
+  font-size: 16px;
+  animation: fadeInBounce 0.3s ease;
+}
+
+@keyframes fadeInBounce {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Footer */
+.snippets-panel-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.snippet-tip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* Mobile Responsive */
+@media (max-width: 1024px) {
+  .snippets-side-panel {
+    right: -100%;
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .snippets-side-panel.open {
+    right: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .snippets-side-panel {
+    max-width: 100%;
+  }
+}
+
+/* Scrollbar Styling */
+.snippets-panel-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.snippets-panel-content::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+.snippets-panel-content::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.snippets-panel-content::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
