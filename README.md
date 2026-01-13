@@ -1,42 +1,122 @@
-# Supabase Todos App
+# HD Flowsheet & QA Tracker - React Edition
 
-A simple React todo application using Supabase as the backend.
+A modern React-based hemodialysis patient tracking and QA management system.
 
-## Setup
+## ✨ What's Working Right Now
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
+✅ **Patient Management** - Add, edit, delete patients with full details
+✅ **QA Checklists** - 9 checkboxes (Pre, 30min, Meds, Abx/IDPN, STAT Labs, etc.)
+✅ **Weight & UF** - Auto-calculates UF from pre/post weights
+✅ **Treatment Times** - Start/end time tracking
+✅ **Notes** - Per-patient notes
+✅ **Shifts** - 1st/2nd/3rd shift tabs with counts
+✅ **Pod Grouping** - Organize by technician
+✅ **Auto-Save** - Everything saves to browser automatically
+✅ **Themes** - 5 professional color schemes
 
-2. Create a `.env` file based on `.env.example`:
-   ```bash
-   cp .env.example .env
-   ```
+## 🚀 Deploy Your App (2 Minutes!)
 
-3. Add your Supabase credentials to `.env`:
-   ```
-   VITE_SUPABASE_URL=your-supabase-url
-   VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
-   ```
+### Easiest: Vercel (Recommended)
+1. Go to **https://vercel.com/signup** and sign in with GitHub
+2. Click **"Add New..." → "Project"**
+3. Import your **Supabase** repository
+4. Click **"Deploy"**
+5. Done! You get a live URL
 
-4. Make sure your Supabase database has a `todos` table with the following schema:
-   - `id` (bigint, primary key)
-   - `user_id` (uuid, references auth.users)
-   - `task` (text)
-   - `is_complete` (boolean, default false)
-   - `inserted_at` (timestamp)
+**Full instructions**: See [DEPLOYMENT.md](./DEPLOYMENT.md)
 
-## Development
+## 💻 Or Run Locally
 
-Run the development server:
 ```bash
+npm install
 npm run dev
+# Open http://localhost:5173
 ```
 
-## Features
+## 📖 How to Use
 
-- View all todos from your Supabase database
-- Add new todos
-- Toggle todo completion status
-- Real-time error handling
+1. **Add Patient**: Click "+ Add Patient" button
+2. **Fill Details**: Enter name (initials), chair, section, shift
+3. **Expand Card**: Click any patient to see full details
+4. **Check QA Items**: Click checkboxes as you complete tasks
+5. **Enter Data**: Add weights, times, notes
+6. **Auto-Save**: Everything saves automatically!
+
+## 📁 What's Included
+
+```
+✅ Patient Charting (Working!)
+   - Add/edit/delete patients
+   - QA checklists
+   - Weight & UF calculations
+   - Treatment times
+   - Notes
+
+🚧 Operations (Coming Soon)
+   - Checklists management
+   - Labs tracking
+   - Snippets
+
+🚧 Reports (Coming Soon)
+   - End of Shift Report generator
+
+🚧 Excel Import (Coming Soon)
+   - Upload patient lists
+```
+
+## 🗄️ Database Setup (Optional)
+
+For cloud storage with Supabase:
+1. Run SQL from `supabase_schema.sql` in your Supabase SQL Editor
+2. Uncomment Supabase integration code (coming in next update)
+
+Currently uses browser localStorage - no database needed!
+
+## 🎨 Features
+
+- **5 Themes**: Clinical Blue, Slate, Warm, Navy, Ultra-Light
+- **Shift Tabs**: 1st, 2nd, 3rd with patient counts
+- **Pod Grouping**: Organize by technician
+- **Status Pills**: Visual QA completion indicators
+- **Auto UF Calc**: Calculates from pre/post weights
+- **Expandable Cards**: Show/hide patient details
+
+## 🚧 Roadmap
+
+**Next Up:**
+- Excel import for patient lists
+- Settings modal (tech management)
+- Theme selector UI
+- Operations module
+- EOSR reports
+
+**Later:**
+- Supabase cloud sync
+- Multi-user support
+- Mobile app
+- Offline mode
+
+## 📊 Tech Stack
+
+- React 18.2 + Vite
+- Supabase (PostgreSQL)
+- CSS with theme system
+- localStorage for data
+
+## 📝 Build Stats
+
+- Bundle: 163 KB (51 KB gzipped)
+- Build time: ~800ms
+- Zero config needed!
+
+## 💡 Need Help?
+
+- Deployment help: See [DEPLOYMENT.md](./DEPLOYMENT.md)
+- Architecture details: See [MIGRATION_PLAN.md](./MIGRATION_PLAN.md)
+- Issues: Open a GitHub Issue
+
+---
+
+**Built for dialysis care teams** ❤️
+
+Version: 0.1.0 | Jan 13, 2026
