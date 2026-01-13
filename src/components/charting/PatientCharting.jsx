@@ -6,6 +6,7 @@ import PatientCard from './PatientCard';
 import AddPatientModal from './AddPatientModal';
 import ExcelImportModal from './ExcelImportModal';
 import SnippetsSidePanel from './SnippetsSidePanel';
+import QuickAssignModal from './QuickAssignModal';
 import './PatientCharting.css';
 
 const PatientCharting = () => {
@@ -15,6 +16,7 @@ const PatientCharting = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showSnippets, setShowSnippets] = useState(false);
+  const [showQuickAssign, setShowQuickAssign] = useState(false);
   const [activePatientId, setActivePatientId] = useState(null);
 
   // Get save button text and class based on status
@@ -146,6 +148,12 @@ const PatientCharting = () => {
         onClose={() => setShowSnippets(false)}
       />
 
+      {/* Quick Assign Modal */}
+      <QuickAssignModal
+        isOpen={showQuickAssign}
+        onClose={() => setShowQuickAssign(false)}
+      />
+
       {/* Floating Buttons - Top Right (matches HDFlowsheet structure) */}
       <div className="floating-buttons">
         <button
@@ -156,7 +164,7 @@ const PatientCharting = () => {
         </button>
         <button
           className="floating-btn"
-          onClick={() => {/* TODO: Quick Assign */}}
+          onClick={() => setShowQuickAssign(true)}
         >
           👥 Quick Assign
         </button>
