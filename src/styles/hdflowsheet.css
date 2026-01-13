@@ -120,12 +120,13 @@
         .top-nav {
             display: flex;
             justify-content: center;
+            align-items: center;
             gap: 8px;
             margin-bottom: 15px;
             background: rgba(255, 255, 255, 0.15);
             border-radius: 12px;
             padding: 6px;
-            max-width: 600px;
+            max-width: 720px;
             margin-left: auto;
             margin-right: auto;
         }

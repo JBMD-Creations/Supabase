@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
+import SettingsModal from '../settings/SettingsModal';
 import './MainLayout.css';
 
 const MainLayout = ({ activeTab, onTabChange, children }) => {
   const { theme } = useTheme();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   return (
     <div className="hd-app" data-theme={theme}>
@@ -26,12 +29,25 @@ const MainLayout = ({ activeTab, onTabChange, children }) => {
         >
           Reports
         </button>
+        <button
+          className="settings-btn"
+          onClick={() => setIsSettingsOpen(true)}
+          aria-label="Open settings"
+        >
+          ⚙️
+        </button>
       </nav>
 
       {/* Main Content */}
       <main className="main-content">
         {children}
       </main>
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
     </div>
   );
 };
