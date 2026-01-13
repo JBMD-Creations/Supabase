@@ -120,21 +120,39 @@ const PatientCharting = () => {
         onClose={() => setShowImportModal(false)}
       />
 
-      {/* Snippets Side Panel */}
+      {/* Snippets Side Panel (Drawer) */}
       <SnippetsSidePanel
         isOpen={showSnippets}
         onClose={() => setShowSnippets(false)}
       />
 
-      {/* Floating Snippets Button */}
-      <button
-        className="snippets-fab"
-        onClick={() => setShowSnippets(!showSnippets)}
-        aria-label="Toggle snippets panel"
-        title="Quick Snippets"
-      >
-        📝
-      </button>
+      {/* Floating Buttons - Top Right (matches HDFlowsheet structure) */}
+      <div className="floating-buttons">
+        <button
+          className="floating-btn"
+          onClick={() => setShowSnippets(!showSnippets)}
+        >
+          📋 Charting
+        </button>
+        <button
+          className="floating-btn"
+          onClick={() => {/* TODO: Quick Assign */}}
+        >
+          👥 Quick Assign
+        </button>
+        <button
+          className="floating-btn"
+          onClick={() => {/* TODO: Quick Notes */}}
+        >
+          📝 Quick Notes
+        </button>
+        <button
+          className="floating-btn"
+          onClick={() => {/* TODO: Save All */}}
+        >
+          💾 Save All
+        </button>
+      </div>
     </div>
   );
 };
