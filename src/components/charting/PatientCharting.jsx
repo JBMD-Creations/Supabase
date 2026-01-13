@@ -4,6 +4,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import PatientCard from './PatientCard';
 import AddPatientModal from './AddPatientModal';
 import ExcelImportModal from './ExcelImportModal';
+import SnippetsSidePanel from './SnippetsSidePanel';
 import './PatientCharting.css';
 
 const PatientCharting = () => {
@@ -11,6 +12,7 @@ const PatientCharting = () => {
   const { technicians } = useTheme();
   const [showAddModal, setShowAddModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showSnippets, setShowSnippets] = useState(false);
   const [activePatientId, setActivePatientId] = useState(null);
 
   const filteredPatients = getFilteredPatients();
@@ -117,6 +119,22 @@ const PatientCharting = () => {
         isOpen={showImportModal}
         onClose={() => setShowImportModal(false)}
       />
+
+      {/* Snippets Side Panel */}
+      <SnippetsSidePanel
+        isOpen={showSnippets}
+        onClose={() => setShowSnippets(false)}
+      />
+
+      {/* Floating Snippets Button */}
+      <button
+        className="snippets-fab"
+        onClick={() => setShowSnippets(!showSnippets)}
+        aria-label="Toggle snippets panel"
+        title="Quick Snippets"
+      >
+        📝
+      </button>
     </div>
   );
 };
