@@ -4,8 +4,8 @@ import { useTheme } from '../../contexts/ThemeContext';
 import './QuickAssignModal.css';
 
 const QuickAssignModal = ({ isOpen, onClose }) => {
-  const { patients, getFilteredPatients, updatePatient, sections } = usePatients();
-  const { technicians } = useTheme();
+  const { patients, getFilteredPatients, updatePatient, sections = {} } = usePatients();
+  const { technicians = [] } = useTheme();
   const [selectedPatients, setSelectedPatients] = useState(new Set());
   const [assignTech, setAssignTech] = useState('');
   const [assignChair, setAssignChair] = useState('');
@@ -69,12 +69,17 @@ const QuickAssignModal = ({ isOpen, onClose }) => {
   const handleAssignTech = () => {
     if (!assignTech || selectedPatients.size === 0) return;
 
-    selectedPatients.forEach(patientId => {
-      updatePatient(patientId, { tech: assignTech });
-    });
+    try {
+      const patientIds = Array.from(selectedPatients);
+      patientIds.forEach(patientId => {
+        updatePatient(patientId, { tech: assignTech });
+      });
 
-    setSelectedPatients(new Set());
-    setAssignTech('');
+      setSelectedPatients(new Set());
+      setAssignTech('');
+    } catch (error) {
+      console.error('Error assigning technician:', error);
+    }
   };
 
   const handleAssignChairs = () => {
@@ -103,34 +108,49 @@ const QuickAssignModal = ({ isOpen, onClose }) => {
   const handleAssignPod = () => {
     if (!assignPod || selectedPatients.size === 0) return;
 
-    selectedPatients.forEach(patientId => {
-      updatePatient(patientId, { pod: assignPod });
-    });
+    try {
+      const patientIds = Array.from(selectedPatients);
+      patientIds.forEach(patientId => {
+        updatePatient(patientId, { pod: assignPod });
+      });
 
-    setSelectedPatients(new Set());
-    setAssignPod('');
+      setSelectedPatients(new Set());
+      setAssignPod('');
+    } catch (error) {
+      console.error('Error assigning pod:', error);
+    }
   };
 
   const handleAssignSection = () => {
     if (!assignSection || selectedPatients.size === 0) return;
 
-    selectedPatients.forEach(patientId => {
-      updatePatient(patientId, { section: assignSection });
-    });
+    try {
+      const patientIds = Array.from(selectedPatients);
+      patientIds.forEach(patientId => {
+        updatePatient(patientId, { section: assignSection });
+      });
 
-    setSelectedPatients(new Set());
-    setAssignSection('');
+      setSelectedPatients(new Set());
+      setAssignSection('');
+    } catch (error) {
+      console.error('Error assigning section:', error);
+    }
   };
 
   const handleClearAssignments = () => {
     if (selectedPatients.size === 0) return;
     if (!confirm('Clear tech and chair assignments for selected patients?')) return;
 
-    selectedPatients.forEach(patientId => {
-      updatePatient(patientId, { tech: '', chair: null });
-    });
+    try {
+      const patientIds = Array.from(selectedPatients);
+      patientIds.forEach(patientId => {
+        updatePatient(patientId, { tech: '', chair: null });
+      });
 
-    setSelectedPatients(new Set());
+      setSelectedPatients(new Set());
+    } catch (error) {
+      console.error('Error clearing assignments:', error);
+    }
   };
 
   const handleOverlayClick = (e) => {
@@ -167,9 +187,9 @@ const QuickAssignModal = ({ isOpen, onClose }) => {
                   onChange={(e) => setAssignTech(e.target.value)}
                 >
                   <option value="">Select Tech...</option>
-                  {technicians.map((tech, idx) => (
-                    <option key={idx} value={tech.name}>
-                      {tech.name} (Pod {tech.pod})
+                  {(technicians || []).map((tech, idx) => (
+                    <option key={idx} value={tech?.name || ''}>
+                      {tech?.name || 'Unknown'}{tech?.pod ? ` (Pod ${tech.pod})` : ''}
                     </option>
                   ))}
                 </select>
@@ -244,11 +264,18 @@ const QuickAssignModal = ({ isOpen, onClose }) => {
                   onChange={(e) => setAssignSection(e.target.value)}
                 >
                   <option value="">Select Section...</option>
-                  {Object.keys(sections).map(section => (
-                    <option key={section} value={section}>
-                      {section} (Chairs {sections[section].chairs[0]}-{sections[section].chairs[sections[section].chairs.length - 1]})
-                    </option>
-                  ))}
+                  {Object.keys(sections || {}).map(section => {
+                    const sectionData = sections[section];
+                    const chairs = sectionData?.chairs || [];
+                    const chairRange = chairs.length > 0
+                      ? `(Chairs ${chairs[0]}-${chairs[chairs.length - 1]})`
+                      : '';
+                    return (
+                      <option key={section} value={section}>
+                        {section} {chairRange}
+                      </option>
+                    );
+                  })}
                 </select>
                 <button
                   className="assign-btn"
@@ -349,9 +376,9 @@ const QuickAssignModal = ({ isOpen, onClose }) => {
 
         <div className="quick-assign-footer">
           <span className="footer-info">
-            {filteredPatients.length} patients in shift |
-            {filteredPatients.filter(p => p.tech).length} assigned techs |
-            {filteredPatients.filter(p => p.chair).length} assigned chairs
+            {filteredPatients?.length || 0} patients in shift |{' '}
+            {filteredPatients?.filter(p => p?.tech).length || 0} assigned techs |{' '}
+            {filteredPatients?.filter(p => p?.chair).length || 0} assigned chairs
           </span>
           <button className="done-btn" onClick={onClose}>Done</button>
         </div>
