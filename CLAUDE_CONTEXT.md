@@ -13,6 +13,18 @@
 2. **All Supabase setup was done by Claude** through the xCloud.host web interface
 3. **SQL execution**: Copy SQL from `supabase_schema.sql` and paste into Supabase Dashboard > SQL Editor > New Query > Run
 
+## xCloud Supabase Port Configuration
+
+| Service | External Port | Internal Port |
+|---------|---------------|---------------|
+| Studio (Dashboard) | 18010 | 3000 |
+| Kong API (App connects here) | **18011** | 8000 |
+| Kong HTTPS | 18012 | 8443 |
+| PostgreSQL | 18013 | 5432 |
+| Analytics | 18014 | - |
+
+**App API URL**: `https://jbcloud.app:18011` (Kong HTTP port)
+
 ## How to Run Database Schema
 
 1. Open your Supabase project dashboard (web browser)
@@ -30,6 +42,7 @@
 - `.env` - Local environment variables (gitignored)
 - `src/lib/supabase.js` - Supabase client initialization
 
-## Supabase Dashboard URL
+## Supabase URLs
 
-Your Supabase project is at: `https://jbcloud.app` (or access via xCloud.host dashboard)
+- **Dashboard/Studio**: `https://jbcloud.app:18010`
+- **API (for app)**: `https://jbcloud.app:18011`
