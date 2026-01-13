@@ -73,11 +73,24 @@ export const PatientProvider = ({ children }) => {
         ettSigned: false,
         chartClosed: false
       },
-      hospitalized: { isHosp: false, hospital: '' },
-      missedTx: { isMissed: false, type: '' },
+      hospitalized: { isHosp: false, hospital: '', days: 0 },
+      missedTx: { isMissed: false, count: 0, reason: '' },
       miscTodos: [],
       collapsedSections: {},
       wheelchairWeight: {},
+      // EOSR-specific fields
+      eosr: {
+        covid: false,
+        earlyTermination: { is: false, minutes: 0, reason: '' },
+        medsRescheduled: { is: false, meds: '' },
+        statLabs: [],
+        sentOut: { is: false, destination: '', reason: '' },
+        welfareCheck: { is: false, reason: '' },
+        isNewPatient: false,
+        midasReport: { is: false, reason: '' },
+        accessComplication: { is: false, type: '' },
+        disinfectionComplete: true
+      },
       ...patientData
     };
 
@@ -132,11 +145,23 @@ export const PatientProvider = ({ children }) => {
           ettSigned: false,
           chartClosed: false
         },
-        hospitalized: { isHosp: false, hospital: '' },
-        missedTx: { isMissed: false, type: '' },
+        hospitalized: { isHosp: false, hospital: '', days: 0 },
+        missedTx: { isMissed: false, count: 0, reason: '' },
         miscTodos: [],
         collapsedSections: {},
-        wheelchairWeight: {}
+        wheelchairWeight: {},
+        eosr: {
+          covid: false,
+          earlyTermination: { is: false, minutes: 0, reason: '' },
+          medsRescheduled: { is: false, meds: '' },
+          statLabs: [],
+          sentOut: { is: false, destination: '', reason: '' },
+          welfareCheck: { is: false, reason: '' },
+          isNewPatient: false,
+          midasReport: { is: false, reason: '' },
+          accessComplication: { is: false, type: '' },
+          disinfectionComplete: true
+        }
       };
     });
 
