@@ -7,6 +7,24 @@
   margin-bottom: 20px;
 }
 
+.import-excel-btn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+}
+
+.import-excel-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4);
+}
+
 .add-patient-btn {
   padding: 12px 24px;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);

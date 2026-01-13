@@ -3,12 +3,14 @@ import { usePatients } from '../../contexts/PatientContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import PatientCard from './PatientCard';
 import AddPatientModal from './AddPatientModal';
+import ExcelImportModal from './ExcelImportModal';
 import './PatientCharting.css';
 
 const PatientCharting = () => {
   const { patients, getFilteredPatients, activeShift, setActiveShift, selectedShifts, setSelectedShifts } = usePatients();
   const { technicians } = useTheme();
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [activePatientId, setActivePatientId] = useState(null);
 
   const filteredPatients = getFilteredPatients();
@@ -37,12 +39,20 @@ const PatientCharting = () => {
             Active Shift: {activeShift} | Patients: {filteredPatients.length} | Technicians: {technicians.length}
           </p>
         </div>
-        <button
-          className="add-patient-btn"
-          onClick={() => setShowAddModal(true)}
-        >
-          + Add Patient
-        </button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button
+            className="import-excel-btn"
+            onClick={() => setShowImportModal(true)}
+          >
+            📊 Import Excel
+          </button>
+          <button
+            className="add-patient-btn"
+            onClick={() => setShowAddModal(true)}
+          >
+            + Add Patient
+          </button>
+        </div>
       </div>
 
       {/* Shift Tabs */}
@@ -101,6 +111,12 @@ const PatientCharting = () => {
       {showAddModal && (
         <AddPatientModal onClose={() => setShowAddModal(false)} />
       )}
+
+      {/* Excel Import Modal */}
+      <ExcelImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+      />
     </div>
   );
 };
