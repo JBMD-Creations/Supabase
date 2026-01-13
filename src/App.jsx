@@ -3,6 +3,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { PatientProvider } from './contexts/PatientContext';
 import { OperationsProvider } from './contexts/OperationsContext';
 import { SnippetProvider } from './contexts/SnippetContext';
+import { SaveProvider } from './contexts/SaveContext';
 import MainLayout from './components/layout/MainLayout';
 import PatientCharting from './components/charting/PatientCharting';
 import OperationsPage from './components/operations/OperationsPage';
@@ -30,9 +31,11 @@ function App() {
       <PatientProvider>
         <OperationsProvider>
           <SnippetProvider>
-            <MainLayout activeTab={activeTab} onTabChange={setActiveTab}>
-              {renderContent()}
-            </MainLayout>
+            <SaveProvider>
+              <MainLayout activeTab={activeTab} onTabChange={setActiveTab}>
+                {renderContent()}
+              </MainLayout>
+            </SaveProvider>
           </SnippetProvider>
         </OperationsProvider>
       </PatientProvider>
