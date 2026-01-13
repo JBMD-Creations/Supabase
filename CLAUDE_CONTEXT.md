@@ -46,3 +46,10 @@
 
 - **Dashboard/Studio**: `https://jbcloud.app:18010`
 - **API (for app)**: `https://jbcloud.app:18011`
+
+## App Deployment
+
+- **Frontend App URL**: `https://hdv.jbcloud.app` (hosted on Vercel)
+- **Vercel Env Vars Required**:
+  - `VITE_SUPABASE_URL` = `https://jbcloud.app:18011`
+  - `VITE_SUPABASE_ANON_KEY` = (the JWT token)
