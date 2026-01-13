@@ -319,8 +319,10 @@ export const SupabaseDataProvider = ({ children }) => {
   useEffect(() => {
     if (isAuthenticated && isOnline) {
       syncAll();
+    } else if (!isAuthenticated) {
+      setSyncStatus('idle');
     }
-  }, [isAuthenticated, isOnline]);
+  }, [isAuthenticated, isOnline, syncAll]);
 
   const value = {
     // Status
