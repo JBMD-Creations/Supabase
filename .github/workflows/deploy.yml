@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - claude/migrate-hdflowsheet-react-wlvYf
+      - claude/fix-deployment-issues-UP0Wl
   workflow_dispatch:
 
 permissions:
@@ -34,6 +35,8 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          VITE_BASE_PATH: /Supabase/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
