@@ -579,3 +579,76 @@ textarea:focus {
     font-size: 0.85em;
   }
 }
+
+/* Save Button States */
+.floating-btn.save-btn {
+  transition: all 0.3s ease;
+}
+
+.floating-btn.save-btn.saving {
+  background: #f59e0b;
+  cursor: wait;
+}
+
+.floating-btn.save-btn.saved {
+  background: #10b981;
+}
+
+.floating-btn.save-btn.error {
+  background: #ef4444;
+}
+
+.floating-btn.save-btn.unsaved {
+  background: #6366f1;
+  animation: pulse-unsaved 2s infinite;
+}
+
+@keyframes pulse-unsaved {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.7);
+  }
+}
+
+.floating-btn.save-btn:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+/* Auto-save Indicator */
+.autosave-indicator {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(30, 58, 95, 0.9);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  z-index: 998;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.autosave-indicator::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+  animation: autosave-pulse 2s infinite;
+}
+
+@keyframes autosave-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

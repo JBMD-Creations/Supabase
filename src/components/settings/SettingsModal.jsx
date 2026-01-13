@@ -1,9 +1,20 @@
 import { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useSave } from '../../contexts/SaveContext';
 import './SettingsModal.css';
 
 const SettingsModal = ({ isOpen, onClose }) => {
   const { theme, setTheme, themes, technicians, addTechnician, removeTechnician, clearAllTechnicians } = useTheme();
+  const {
+    autoSaveEnabled,
+    setAutoSaveEnabled,
+    autoSaveInterval,
+    setAutoSaveInterval,
+    lastSaved,
+    exportAllData,
+    clearAllData,
+    saveAll
+  } = useSave();
   const [newTechName, setNewTechName] = useState('');
   const [newTechPod, setNewTechPod] = useState('');
   const [activeTab, setActiveTab] = useState('theme');
@@ -47,6 +58,12 @@ const SettingsModal = ({ isOpen, onClose }) => {
             onClick={() => setActiveTab('technicians')}
           >
             Technicians
+          </button>
+          <button
+            className={`settings-tab ${activeTab === 'data' ? 'active' : ''}`}
+            onClick={() => setActiveTab('data')}
+          >
+            Data
           </button>
         </div>
 
@@ -135,6 +152,71 @@ const SettingsModal = ({ isOpen, onClose }) => {
                   <p>No technicians added yet</p>
                 </div>
               )}
+            </div>
+          )}
+
+          {activeTab === 'data' && (
+            <div className="settings-section">
+              <h3>Auto-Save Settings</h3>
+              <p className="settings-description">
+                Configure automatic saving of your data
+              </p>
+
+              <div className="data-settings">
+                <label className="toggle-setting">
+                  <span className="toggle-label">Enable Auto-Save</span>
+                  <input
+                    type="checkbox"
+                    checked={autoSaveEnabled}
+                    onChange={(e) => setAutoSaveEnabled(e.target.checked)}
+                    className="toggle-input"
+                  />
+                  <span className="toggle-switch"></span>
+                </label>
+
+                <div className="interval-setting">
+                  <label htmlFor="autosave-interval">Auto-Save Interval</label>
+                  <select
+                    id="autosave-interval"
+                    value={autoSaveInterval}
+                    onChange={(e) => setAutoSaveInterval(parseInt(e.target.value))}
+                    disabled={!autoSaveEnabled}
+                  >
+                    <option value={30000}>30 seconds</option>
+                    <option value={60000}>1 minute</option>
+                    <option value={120000}>2 minutes</option>
+                    <option value={300000}>5 minutes</option>
+                  </select>
+                </div>
+
+                {lastSaved && (
+                  <p className="last-saved-info">
+                    Last saved: {lastSaved.toLocaleString()}
+                  </p>
+                )}
+              </div>
+
+              <h3 style={{ marginTop: '24px' }}>Data Management</h3>
+              <p className="settings-description">
+                Export or clear your data
+              </p>
+
+              <div className="data-actions">
+                <button className="data-action-btn save-now-btn" onClick={saveAll}>
+                  💾 Save Now
+                </button>
+                <button className="data-action-btn export-btn" onClick={exportAllData}>
+                  📤 Export All Data
+                </button>
+                <button className="data-action-btn danger-btn" onClick={clearAllData}>
+                  🗑️ Clear All Data
+                </button>
+              </div>
+
+              <div className="data-info">
+                <p><strong>Note:</strong> Your data is stored locally in your browser.
+                   Use "Export All Data" to create a backup file.</p>
+              </div>
             </div>
           )}
         </div>

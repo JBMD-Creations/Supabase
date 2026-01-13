@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { usePatients } from '../../contexts/PatientContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useSave } from '../../contexts/SaveContext';
 import PatientCard from './PatientCard';
 import AddPatientModal from './AddPatientModal';
 import ExcelImportModal from './ExcelImportModal';
@@ -10,10 +11,29 @@ import './PatientCharting.css';
 const PatientCharting = () => {
   const { patients, getFilteredPatients, activeShift, setActiveShift, selectedShifts, setSelectedShifts } = usePatients();
   const { technicians } = useTheme();
+  const { saveAll, saveStatus, SAVE_STATUS, hasUnsavedChanges, lastSaved, autoSaveEnabled } = useSave();
   const [showAddModal, setShowAddModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showSnippets, setShowSnippets] = useState(false);
   const [activePatientId, setActivePatientId] = useState(null);
+
+  // Get save button text and class based on status
+  const getSaveButtonContent = () => {
+    switch (saveStatus) {
+      case SAVE_STATUS.SAVING:
+        return { text: '⏳ Saving...', className: 'saving' };
+      case SAVE_STATUS.SAVED:
+        return { text: '✓ Saved!', className: 'saved' };
+      case SAVE_STATUS.ERROR:
+        return { text: '❌ Error', className: 'error' };
+      case SAVE_STATUS.UNSAVED:
+        return { text: '💾 Save All •', className: 'unsaved' };
+      default:
+        return { text: '💾 Save All', className: '' };
+    }
+  };
+
+  const saveButton = getSaveButtonContent();
 
   const filteredPatients = getFilteredPatients();
 
@@ -147,12 +167,24 @@ const PatientCharting = () => {
           📝 Quick Notes
         </button>
         <button
-          className="floating-btn"
-          onClick={() => {/* TODO: Save All */}}
+          className={`floating-btn save-btn ${saveButton.className}`}
+          onClick={saveAll}
+          disabled={saveStatus === SAVE_STATUS.SAVING}
         >
-          💾 Save All
+          {saveButton.text}
         </button>
       </div>
+
+      {/* Auto-save indicator */}
+      {autoSaveEnabled && (
+        <div className="autosave-indicator">
+          {lastSaved ? (
+            <span>Auto-save: {lastSaved.toLocaleTimeString()}</span>
+          ) : (
+            <span>Auto-save enabled</span>
+          )}
+        </div>
+      )}
     </div>
   );
 };
