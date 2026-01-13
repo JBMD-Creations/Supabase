@@ -534,42 +534,48 @@ textarea:focus {
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-/* Floating Snippets Button */
-.snippets-fab {
+/* Floating Buttons Container - Top Right (matches HDFlowsheet) */
+.floating-buttons {
   position: fixed;
-  bottom: 30px;
-  right: 30px;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  right: 20px;
+  top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 999;
+}
+
+.floating-btn {
+  background: #5B9BD5;
   color: white;
   border: none;
-  font-size: 28px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.9em;
   cursor: pointer;
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
-  transition: all 0.3s;
-  z-index: 998;
+  box-shadow: 0 4px 12px rgba(91, 155, 213, 0.4);
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
 }
 
-.snippets-fab:hover {
-  transform: scale(1.1) rotate(10deg);
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.5);
-}
-
-.snippets-fab:active {
-  transform: scale(0.95);
+.floating-btn:hover {
+  background: #4A8BC5;
+  transform: translateX(-3px);
+  box-shadow: 0 6px 16px rgba(91, 155, 213, 0.5);
 }
 
 @media (max-width: 768px) {
-  .snippets-fab {
-    bottom: 20px;
-    right: 20px;
-    width: 56px;
-    height: 56px;
-    font-size: 24px;
+  .floating-buttons {
+    right: 10px;
+    top: 10px;
+  }
+
+  .floating-btn {
+    padding: 10px 14px;
+    font-size: 0.85em;
   }
 }

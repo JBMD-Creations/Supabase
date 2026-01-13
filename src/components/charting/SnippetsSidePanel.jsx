@@ -90,28 +90,22 @@ const SnippetsSidePanel = ({ isOpen, onClose }) => {
 
   return (
     <>
-      {/* Overlay for mobile */}
-      {isOpen && (
-        <div className="snippets-overlay" onClick={onClose}></div>
-      )}
-
-      {/* Side Panel */}
-      <div className={`snippets-side-panel ${isOpen ? 'open' : ''}`}>
-        <div className="snippets-panel-header">
-          <div>
-            <h3>📋 Charting Snippet Builder</h3>
-            <p className="snippets-panel-subtitle">Build your charting note</p>
+      {/* Drawer Panel - slides in from right, does NOT block main content */}
+      <div className={`drawer-panel ${isOpen ? 'open' : ''}`}>
+        <div className="drawer-header">
+          <div className="drawer-header-content">
+            <div className="drawer-title">📋 Charting Snippet Builder</div>
+            <button
+              className="drawer-close-btn"
+              onClick={onClose}
+              aria-label="Close snippets panel"
+            >
+              ×
+            </button>
           </div>
-          <button
-            className="snippets-close-btn"
-            onClick={onClose}
-            aria-label="Close snippets panel"
-          >
-            ×
-          </button>
         </div>
 
-        <div className="snippets-panel-content">
+        <div className="drawer-body">
           {/* Generated Snippet Display (Sticky) */}
           <div className="generated-snippet-display">
             <div className="generated-snippet-title">Generated Note:</div>

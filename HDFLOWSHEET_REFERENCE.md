@@ -55,7 +55,54 @@ pt-charting-page
 ├── patient-tabs-container
 │   └── patient-tabs (individual patient tabs with indicators)
 ├── patient-list (patient cards container)
-└── drawer-panel (Snippet Builder - slides in from right)
+└── drawer-panel (Snippet Builder - slides in from right, NO overlay)
+```
+
+### Floating Buttons (Top-Right Corner)
+**CRITICAL:** These buttons are FIXED position in top-right, stacked VERTICALLY.
+
+```
+floating-buttons (position: fixed, right: 20px, top: 20px)
+├── 📋 Charting    → toggles drawer-panel
+├── 👥 Quick Assign → opens bulk assign modal
+├── 📝 Quick Notes  → opens quick notes modal
+└── 💾 Save All     → saves all data
+```
+
+**CSS Structure:**
+```css
+.floating-buttons {
+  position: fixed;
+  right: 20px;
+  top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 999;
+}
+
+.floating-btn {
+  background: #5B9BD5;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+```
+
+### Drawer Panel (NOT an overlay)
+The drawer slides in from the right and does NOT block the main content.
+Users can still interact with patient cards while the drawer is open.
+
+```
+drawer-panel (position: fixed, right: -500px → 0 when open)
+├── drawer-header
+│   ├── drawer-title (📋 Charting Snippet Builder)
+│   └── drawer-close-btn (×)
+└── drawer-body
+    ├── generated-snippet-display (sticky)
+    ├── pinned-snippet (Access visible and secure...)
+    └── snippet-categories (collapsible)
 ```
 
 ### Patient Card Structure
