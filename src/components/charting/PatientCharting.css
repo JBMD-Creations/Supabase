@@ -868,3 +868,50 @@ textarea:focus {
   padding: 12px;
   font-style: italic;
 }
+
+/* Notification Badge for Floating Button */
+.floating-btn .notification-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #dc2626;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Alert Button Styles */
+.floating-btn.alert-btn {
+  position: relative;
+}
+
+.floating-btn.alert-btn.has-critical {
+  background: #ef4444 !important;
+  animation: pulse-critical 2s infinite;
+}
+
+.floating-btn.alert-btn.has-warning {
+  background: #f59e0b !important;
+}
+
+.floating-btn.alert-btn.has-info {
+  background: #3b82f6 !important;
+}
+
+.floating-btn.alert-btn.no-alerts {
+  background: #10b981 !important;
+}
+
+@keyframes pulse-critical {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(239, 68, 68, 0.7);
+  }
+}
