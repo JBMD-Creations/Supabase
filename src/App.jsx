@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { PatientProvider } from './contexts/PatientContext';
 import { OperationsProvider } from './contexts/OperationsContext';
@@ -35,6 +36,7 @@ function App() {
               <MainLayout activeTab={activeTab} onTabChange={setActiveTab}>
                 {renderContent()}
               </MainLayout>
+              <Analytics />
             </SaveProvider>
           </SnippetProvider>
         </OperationsProvider>
