@@ -1,4 +1,6 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { supabase } from '../lib/supabase';
+import { useAuth } from './AuthContext';
 
 const SnippetContext = createContext();
 
@@ -145,6 +147,9 @@ const DEFAULT_SNIPPETS = [
 ];
 
 export const SnippetProvider = ({ children }) => {
+  const { user, isAuthenticated } = useAuth();
+  const syncDebounceRef = useRef(null);
+
   const [configurations, setConfigurations] = useState(() => {
     const saved = localStorage.getItem('hd-snippet-configs');
     return saved ? JSON.parse(saved) : DEFAULT_SNIPPETS;
@@ -157,7 +162,7 @@ export const SnippetProvider = ({ children }) => {
 
   const [tagFilter, setTagFilter] = useState(new Set());
 
-  // Persist to localStorage
+  // Persist to localStorage (fallback)
   useEffect(() => {
     localStorage.setItem('hd-snippet-configs', JSON.stringify(configurations));
   }, [configurations]);
@@ -165,6 +170,230 @@ export const SnippetProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('hd-active-snippet-config', activeConfigId?.toString() || '');
   }, [activeConfigId]);
+
+  // ============================================
+  // CLOUD SYNC FUNCTIONS
+  // ============================================
+
+  // Fetch snippets from Supabase
+  const fetchCloudSnippets = useCallback(async () => {
+    if (!isAuthenticated || !user) return [];
+
+    try {
+      const { data, error } = await supabase
+        .from('snippet_configurations')
+        .select(`
+          *,
+          snippet_sections(
+            *,
+            snippets(*)
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('order_position', { ascending: true });
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        // No cloud snippets, save defaults to cloud
+        await saveAllSnippetsToCloud(DEFAULT_SNIPPETS);
+        return DEFAULT_SNIPPETS;
+      }
+
+      // Transform to local format
+      return data.map(config => ({
+        id: config.id,
+        name: config.name,
+        order: config.order_position,
+        sections: (config.snippet_sections || []).map(section => ({
+          id: section.id,
+          name: section.name,
+          icon: section.icon,
+          order: section.order_position,
+          snippets: (section.snippets || []).map(snippet => ({
+            id: snippet.id,
+            text: snippet.text,
+            tags: snippet.tags || [],
+            order: snippet.order_position || 0
+          }))
+        }))
+      }));
+    } catch (err) {
+      console.error('Error fetching snippets:', err);
+      return [];
+    }
+  }, [isAuthenticated, user]);
+
+  // Save all snippets to cloud
+  const saveAllSnippetsToCloud = async (configs) => {
+    if (!isAuthenticated || !user) return;
+
+    for (const config of configs) {
+      await saveConfigToCloud(config);
+    }
+  };
+
+  // Save single config to cloud
+  const saveConfigToCloud = useCallback(async (config) => {
+    if (!isAuthenticated || !user) return null;
+
+    try {
+      const configData = {
+        user_id: user.id,
+        name: config.name,
+        order_position: config.order || 0
+      };
+
+      let savedConfig;
+      const isCloudId = config.id > 1000000;
+
+      if (isCloudId) {
+        const { data, error } = await supabase
+          .from('snippet_configurations')
+          .update(configData)
+          .eq('id', config.id)
+          .eq('user_id', user.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+        savedConfig = data;
+      } else {
+        const { data, error } = await supabase
+          .from('snippet_configurations')
+          .insert(configData)
+          .select()
+          .single();
+
+        if (error) throw error;
+        savedConfig = data;
+      }
+
+      // Sync sections
+      if (config.sections && config.sections.length > 0) {
+        for (const section of config.sections) {
+          await saveSectionToCloud(savedConfig.id, section);
+        }
+      }
+
+      console.log('Snippet config saved to cloud:', savedConfig.id);
+      return savedConfig.id;
+    } catch (err) {
+      console.error('Error saving snippet config:', err);
+      return null;
+    }
+  }, [isAuthenticated, user]);
+
+  // Save section to cloud
+  const saveSectionToCloud = async (configId, section) => {
+    if (!isAuthenticated || !user) return null;
+
+    try {
+      const sectionData = {
+        config_id: configId,
+        name: section.name,
+        icon: section.icon || '',
+        order_position: section.order || 0
+      };
+
+      let savedSection;
+      const isCloudId = section.id > 1000000;
+
+      if (isCloudId) {
+        const { data, error } = await supabase
+          .from('snippet_sections')
+          .update(sectionData)
+          .eq('id', section.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+        savedSection = data;
+      } else {
+        const { data, error } = await supabase
+          .from('snippet_sections')
+          .insert(sectionData)
+          .select()
+          .single();
+
+        if (error) throw error;
+        savedSection = data;
+      }
+
+      // Sync snippets in section
+      if (section.snippets && section.snippets.length > 0) {
+        for (const snippet of section.snippets) {
+          await saveSnippetToCloud(savedSection.id, snippet);
+        }
+      }
+
+      return savedSection.id;
+    } catch (err) {
+      console.error('Error saving section:', err);
+      return null;
+    }
+  };
+
+  // Save snippet to cloud
+  const saveSnippetToCloud = async (sectionId, snippet) => {
+    if (!isAuthenticated || !user) return null;
+
+    try {
+      const snippetData = {
+        section_id: sectionId,
+        text: snippet.text,
+        tags: snippet.tags || []
+      };
+
+      const isCloudId = snippet.id > 1000000;
+
+      if (isCloudId) {
+        const { error } = await supabase
+          .from('snippets')
+          .update(snippetData)
+          .eq('id', snippet.id);
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('snippets')
+          .insert(snippetData);
+
+        if (error) throw error;
+      }
+    } catch (err) {
+      console.error('Error saving snippet:', err);
+    }
+  };
+
+  // Debounced sync
+  const syncConfigToCloud = useCallback((config) => {
+    if (!isAuthenticated) return;
+
+    if (syncDebounceRef.current) {
+      clearTimeout(syncDebounceRef.current);
+    }
+
+    syncDebounceRef.current = setTimeout(() => {
+      saveConfigToCloud(config);
+    }, 1000);
+  }, [isAuthenticated, saveConfigToCloud]);
+
+  // Load from cloud on auth
+  useEffect(() => {
+    const loadFromCloud = async () => {
+      if (isAuthenticated && user) {
+        const cloudConfigs = await fetchCloudSnippets();
+        if (cloudConfigs && cloudConfigs.length > 0) {
+          setConfigurations(cloudConfigs);
+          if (!activeConfigId || !cloudConfigs.find(c => c.id === activeConfigId)) {
+            setActiveConfigId(cloudConfigs[0].id);
+          }
+        }
+      }
+    };
+    loadFromCloud();
+  }, [isAuthenticated, user, fetchCloudSnippets]);
 
   // Get active configuration
   const getActiveConfig = () => {
@@ -201,9 +430,19 @@ export const SnippetProvider = ({ children }) => {
     ) || [];
   };
 
+  // Update configurations with cloud sync
+  const updateConfigurations = (newConfigs) => {
+    setConfigurations(newConfigs);
+    // Sync the active config to cloud
+    const activeConfig = newConfigs.find(c => c.id === activeConfigId);
+    if (activeConfig) {
+      syncConfigToCloud(activeConfig);
+    }
+  };
+
   const value = {
     configurations,
-    setConfigurations,
+    setConfigurations: updateConfigurations,
     activeConfigId,
     setActiveConfigId,
     tagFilter,
