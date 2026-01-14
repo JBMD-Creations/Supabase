@@ -3,12 +3,14 @@ import { usePatients } from '../../contexts/PatientContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useSave } from '../../contexts/SaveContext';
 import { useNotifications } from '../../contexts/NotificationContext';
+import { useAuth } from '../../contexts/AuthContext';
 import PatientCard from './PatientCard';
 import AddPatientModal from './AddPatientModal';
 import ExcelImportModal from './ExcelImportModal';
 import SnippetsSidePanel from './SnippetsSidePanel';
 import QuickAssignModal from './QuickAssignModal';
 import QuickNotesModal from './QuickNotesModal';
+import { RealtimeCursors } from '../realtime-cursors';
 import './PatientCharting.css';
 
 const PatientCharting = () => {
@@ -16,6 +18,10 @@ const PatientCharting = () => {
   const { technicians } = useTheme();
   const { saveAll, saveStatus, SAVE_STATUS, hasUnsavedChanges, lastSaved, autoSaveEnabled } = useSave();
   const { summary: alertSummary, setShowNotificationPanel, SEVERITY } = useNotifications();
+  const { user, isAuthenticated } = useAuth();
+
+  // Get username for realtime cursors
+  const username = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Anonymous';
   const [showAddModal, setShowAddModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showSnippets, setShowSnippets] = useState(false);
@@ -236,6 +242,14 @@ const PatientCharting = () => {
             <span>Auto-save enabled</span>
           )}
         </div>
+      )}
+
+      {/* Realtime Cursors - Show team member cursors */}
+      {isAuthenticated && (
+        <RealtimeCursors
+          roomName="charting:main:cursors"
+          username={username}
+        />
       )}
     </div>
   );

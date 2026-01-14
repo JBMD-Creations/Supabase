@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { usePatients } from '../../contexts/PatientContext';
+import { RealtimeAvatarStack } from '../realtime-avatar-stack';
 
 // Quick-add todo snippets
 const TODO_SNIPPETS = [
@@ -87,6 +88,7 @@ const PatientCard = ({ patient }) => {
           </p>
         </div>
         <div className="header-badges">
+          <RealtimeAvatarStack roomName={`patient:${patient.id}:viewers`} />
           {incompleteTodos.length > 0 && (
             <span className="todo-badge">{incompleteTodos.length}</span>
           )}

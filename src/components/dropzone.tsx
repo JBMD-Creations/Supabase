@@ -1,8 +1,6 @@
-'use client'
-
 import { cn } from '../lib/utils'
 import { type UseSupabaseUploadReturn } from '../hooks/use-supabase-upload'
-import { Button } from '../components/ui/button'
+import { Button } from './ui/button'
 import { CheckCircle, File, Loader2, Upload, X } from 'lucide-react'
 import { createContext, type PropsWithChildren, useCallback, useContext } from 'react'
 

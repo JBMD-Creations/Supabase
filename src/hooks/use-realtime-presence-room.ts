@@ -1,12 +1,8 @@
-'use client'
-
-import { useCurrentUserImage } from '@/hooks/use-current-user-image'
-import { useCurrentUserName } from '@/hooks/use-current-user-name'
-import { createClient } from '../lib/supabase'
+import { useCurrentUserImage } from './use-current-user-image'
+import { useCurrentUserName } from './use-current-user-name'
+import { supabase } from '../lib/supabase'
 import { REALTIME_SUBSCRIBE_STATES } from '@supabase/supabase-js'
 import { useEffect, useState } from 'react'
-
-const supabase = createClient()
 
 export type RealtimeUser = {
   id: string

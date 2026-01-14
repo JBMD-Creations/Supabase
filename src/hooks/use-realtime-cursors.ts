@@ -1,4 +1,4 @@
-import { createClient } from '../lib/supabase'
+import { supabase } from '../lib/supabase'
 import { RealtimeChannel, REALTIME_SUBSCRIBE_STATES } from '@supabase/supabase-js'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -11,7 +11,7 @@ const useThrottleCallback = <Params extends unknown[], Return>(
   delay: number
 ) => {
   const lastCall = useRef(0)
-  const timeout = useRef<NodeJS.Timeout | null>(null)
+  const timeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   return useCallback(
     (...args: Params) => {
@@ -36,8 +36,6 @@ const useThrottleCallback = <Params extends unknown[], Return>(
     [callback, delay]
   )
 }
-
-const supabase = createClient()
 
 const generateRandomColor = () => `hsl(${Math.floor(Math.random() * 360)}, 100%, 70%)`
 
