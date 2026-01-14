@@ -1,6 +1,4 @@
-'use client'
-
-import { AvatarStack } from '../components/avatar-stack'
+import { AvatarStack } from './avatar-stack'
 import { useRealtimePresenceRoom } from '../hooks/use-realtime-presence-room'
 import { useMemo } from 'react'
 
