@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSupabaseData } from '../../contexts/SupabaseDataContext';
+import { CurrentUserAvatar } from '../current-user-avatar';
 import './AuthModal.css';
 
 const UserMenu = ({ onLoginClick }) => {
@@ -60,7 +61,7 @@ const UserMenu = ({ onLoginClick }) => {
         className="user-menu-trigger"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <span className="user-avatar">{getInitials(user?.email)}</span>
+        <CurrentUserAvatar />
         <SyncStatusBadge status={syncStatus} isOnline={isOnline} />
       </button>
 
