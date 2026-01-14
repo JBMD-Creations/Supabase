@@ -4,7 +4,14 @@ import './SnippetsSidePanel.css';
 
 const SnippetsSidePanel = ({ isOpen, onClose }) => {
   const { getActiveConfig } = useSnippets();
-  const [expandedSections, setExpandedSections] = useState(new Set([1, 2, 3])); // Open first 3 by default
+  const activeConfig = getActiveConfig();
+
+  // Initialize with first 3 section IDs (handles both local and cloud IDs)
+  const [expandedSections, setExpandedSections] = useState(() => {
+    const sections = activeConfig?.sections || [];
+    const firstThreeIds = sections.slice(0, 3).map(s => s.id);
+    return new Set(firstThreeIds);
+  });
   const [selectedSnippets, setSelectedSnippets] = useState([]);
   const [generatedNote, setGeneratedNote] = useState('');
   const [bfr, setBfr] = useState(350);
@@ -16,7 +23,19 @@ const SnippetsSidePanel = ({ isOpen, onClose }) => {
   const [targetWeight, setTargetWeight] = useState('');
   const [copied, setCopied] = useState(false);
 
-  const activeConfig = getActiveConfig();
+  // Update expanded sections when config changes (e.g., after cloud sync)
+  useEffect(() => {
+    if (activeConfig?.sections?.length > 0) {
+      const currentIds = Array.from(expandedSections);
+      const validIds = activeConfig.sections.map(s => s.id);
+      // If current expanded IDs don't match any section, reset to first 3
+      const hasValidExpanded = currentIds.some(id => validIds.includes(id));
+      if (!hasValidExpanded) {
+        const firstThreeIds = activeConfig.sections.slice(0, 3).map(s => s.id);
+        setExpandedSections(new Set(firstThreeIds));
+      }
+    }
+  }, [activeConfig]);
 
   // Update calculations when weights change
   useEffect(() => {

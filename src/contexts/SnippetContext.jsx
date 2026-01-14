@@ -395,9 +395,26 @@ export const SnippetProvider = ({ children }) => {
     loadFromCloud();
   }, [isAuthenticated, user, fetchCloudSnippets]);
 
-  // Get active configuration
+  // Get active configuration (with fallback to first config or defaults)
   const getActiveConfig = () => {
-    return configurations.find(c => c.id === activeConfigId);
+    let config = configurations.find(c => c.id === activeConfigId);
+
+    // Fallback to first available config if active not found
+    if (!config && configurations.length > 0) {
+      config = configurations[0];
+    }
+
+    // Fallback to defaults if no configs at all
+    if (!config) {
+      return DEFAULT_SNIPPETS[0];
+    }
+
+    // Ensure sections array exists and has snippets
+    if (!config.sections || config.sections.length === 0) {
+      return { ...config, sections: DEFAULT_SNIPPETS[0].sections };
+    }
+
+    return config;
   };
 
   // Get all unique tags

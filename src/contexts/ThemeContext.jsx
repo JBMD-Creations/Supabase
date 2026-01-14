@@ -18,6 +18,15 @@ const THEMES = [
   { value: 'ultra-light', label: 'Ultra-Light Clinical' }
 ];
 
+const DEFAULT_TECHNICIANS = [
+  { name: 'Tech 1', pod: 'A' },
+  { name: 'Tech 2', pod: 'A' },
+  { name: 'Tech 3', pod: 'B' },
+  { name: 'Tech 4', pod: 'B' },
+  { name: 'Tech 5', pod: 'C' },
+  { name: 'Tech 6', pod: 'C' }
+];
+
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('hd-theme') || 'clinical-blue';
@@ -25,7 +34,12 @@ export const ThemeProvider = ({ children }) => {
 
   const [technicians, setTechnicians] = useState(() => {
     const saved = localStorage.getItem('hd-technicians');
-    return saved ? JSON.parse(saved) : [];
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Return saved if not empty, otherwise use defaults
+      return parsed.length > 0 ? parsed : DEFAULT_TECHNICIANS;
+    }
+    return DEFAULT_TECHNICIANS;
   });
 
   useEffect(() => {
