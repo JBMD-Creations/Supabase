@@ -8,7 +8,6 @@ import AddPatientModal from './AddPatientModal';
 import ExcelImportModal from './ExcelImportModal';
 import SnippetsSidePanel from './SnippetsSidePanel';
 import QuickAssignModal from './QuickAssignModal';
-import QuickNotesModal from './QuickNotesModal';
 import './PatientCharting.css';
 
 const PatientCharting = () => {
@@ -20,7 +19,6 @@ const PatientCharting = () => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [showSnippets, setShowSnippets] = useState(false);
   const [showQuickAssign, setShowQuickAssign] = useState(false);
-  const [showQuickNotes, setShowQuickNotes] = useState(false);
   const [activePatientId, setActivePatientId] = useState(null);
 
   // Get alert button class based on severity
@@ -195,12 +193,6 @@ const PatientCharting = () => {
           👥 Quick Assign
         </button>
         <button
-          className="floating-btn"
-          onClick={() => setShowQuickNotes(true)}
-        >
-          📝 Quick Notes
-        </button>
-        <button
           className={`floating-btn save-btn ${saveButton.className}`}
           onClick={saveAll}
           disabled={saveStatus === SAVE_STATUS.SAVING}
@@ -208,12 +200,6 @@ const PatientCharting = () => {
           {saveButton.text}
         </button>
       </div>
-
-      {/* Quick Notes Modal */}
-      <QuickNotesModal
-        isOpen={showQuickNotes}
-        onClose={() => setShowQuickNotes(false)}
-      />
 
       {/* Auto-save indicator */}
       {autoSaveEnabled && (
