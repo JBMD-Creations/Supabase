@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
 
@@ -395,8 +395,8 @@ export const SnippetProvider = ({ children }) => {
     loadFromCloud();
   }, [isAuthenticated, user, fetchCloudSnippets]);
 
-  // Get active configuration (with fallback to first config or defaults)
-  const getActiveConfig = useCallback(() => {
+  // Compute active configuration with memoization (stable reference)
+  const activeConfig = useMemo(() => {
     let config = configurations.find(c => c.id === activeConfigId);
 
     // Fallback to first available config if active not found
@@ -429,6 +429,9 @@ export const SnippetProvider = ({ children }) => {
 
     return { ...config, sections: sectionsWithSnippets };
   }, [configurations, activeConfigId]);
+
+  // Keep getActiveConfig for backward compatibility but return memoized value
+  const getActiveConfig = useCallback(() => activeConfig, [activeConfig]);
 
   // Get all unique tags
   const getAllTags = () => {
@@ -477,7 +480,8 @@ export const SnippetProvider = ({ children }) => {
     setActiveConfigId,
     tagFilter,
     setTagFilter,
-    getActiveConfig,
+    activeConfig,        // Direct access to memoized config
+    getActiveConfig,     // Function for backward compatibility
     getAllTags,
     getFilteredSnippets
   };

@@ -1,12 +1,10 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSnippets } from '../../contexts/SnippetContext';
 import './SnippetsSidePanel.css';
 
 const SnippetsSidePanel = ({ isOpen, onClose }) => {
-  const { getActiveConfig } = useSnippets();
-
-  // Memoize activeConfig to prevent infinite re-renders
-  const activeConfig = useMemo(() => getActiveConfig(), [getActiveConfig]);
+  // Use activeConfig directly from context (already memoized)
+  const { activeConfig } = useSnippets();
 
   // Track if we've initialized expanded sections
   const initializedRef = useRef(false);
@@ -31,7 +29,7 @@ const SnippetsSidePanel = ({ isOpen, onClose }) => {
       setExpandedSections(new Set(firstThreeIds));
       initializedRef.current = true;
     }
-  }, [activeConfig?.sections?.length]);
+  }, [activeConfig]);
 
   // Update calculations when weights change
   useEffect(() => {
