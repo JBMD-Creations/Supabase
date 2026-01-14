@@ -1,17 +1,14 @@
 /* Quick Assign Modal Overlay */
 .quick-assign-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6) !important;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 9999;
   overflow: auto;
   padding: 20px;
   box-sizing: border-box;
@@ -19,7 +16,7 @@
 
 /* Modal Container */
 .quick-assign-modal {
-  background-color: #ffffff !important;
+  background: #ffffff;
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   width: 90%;
@@ -30,6 +27,7 @@
   flex-direction: column;
   overflow: hidden;
   margin: auto;
+  position: relative;
 }
 
 /* Header */
