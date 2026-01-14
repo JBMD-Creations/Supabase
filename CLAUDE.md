@@ -21,10 +21,28 @@ This project uses Supabase. Follow these guidelines when writing code.
 create table public.orders (
   id bigint generated always as identity primary key,
   user_id bigint references public.users (id),
-  created_at timestamptz default now() not null
+  created_at timestamptz default now() not null,
+  updated_at timestamptz default now() not null
 );
 create index on public.orders (user_id);
 comment on table public.orders is 'Customer orders';
+
+-- Auto-update updated_at timestamp (moddatetime extension already enabled)
+create trigger handle_updated_at before update
+  on public.orders
+  for each row execute procedure moddatetime(updated_at);
+```
+
+## Auto-Update Timestamps
+
+- Tables with `updated_at` columns MUST have the moddatetime trigger
+- The `moddatetime` extension is already enabled in this project
+- Always add this trigger when creating tables with `updated_at`:
+
+```sql
+create trigger handle_updated_at before update
+  on public.your_table
+  for each row execute procedure moddatetime(updated_at);
 ```
 
 ## Row-Level Security (RLS)
