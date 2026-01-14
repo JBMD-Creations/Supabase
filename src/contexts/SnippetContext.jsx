@@ -409,12 +409,25 @@ export const SnippetProvider = ({ children }) => {
       return DEFAULT_SNIPPETS[0];
     }
 
-    // Ensure sections array exists and has snippets
+    // Ensure sections array exists
     if (!config.sections || config.sections.length === 0) {
       return { ...config, sections: DEFAULT_SNIPPETS[0].sections };
     }
 
-    return config;
+    // Merge sections with default snippets if sections have no snippets
+    const sectionsWithSnippets = config.sections.map((section, index) => {
+      if (!section.snippets || section.snippets.length === 0) {
+        // Find matching default section by name or index
+        const defaultSection = DEFAULT_SNIPPETS[0].sections.find(ds => ds.name === section.name)
+          || DEFAULT_SNIPPETS[0].sections[index];
+        if (defaultSection) {
+          return { ...section, snippets: defaultSection.snippets };
+        }
+      }
+      return section;
+    });
+
+    return { ...config, sections: sectionsWithSnippets };
   };
 
   // Get all unique tags

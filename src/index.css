@@ -24,5 +24,12 @@
   --radius: 0.5rem;
 }
 
-/* Ensure Tailwind utilities don't conflict with hdflowsheet.css */
-/* The hdflowsheet.css is loaded after this, so it takes precedence for duplicates */
+/* Protect modal overlays from Tailwind resets */
+.quick-assign-overlay,
+.modal-overlay,
+.settings-overlay,
+.team-chat-overlay,
+.notification-overlay,
+.auth-modal-overlay {
+  background: rgba(0, 0, 0, 0.6);
+}
