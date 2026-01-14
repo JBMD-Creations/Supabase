@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useTeamChat } from '../../contexts/TeamChatContext';
 import SettingsModal from '../settings/SettingsModal';
 import UserMenu from '../auth/UserMenu';
 import './MainLayout.css';
 
 const MainLayout = ({ activeTab, onTabChange, onLoginClick, children }) => {
   const { theme } = useTheme();
+  const { toggleChatPanel, unreadCount } = useTeamChat();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   return (
@@ -39,6 +41,16 @@ const MainLayout = ({ activeTab, onTabChange, onLoginClick, children }) => {
           </button>
         </div>
         <div className="nav-actions">
+          <button
+            className="chat-btn"
+            onClick={toggleChatPanel}
+            aria-label="Open team chat"
+          >
+            Chat
+            {unreadCount > 0 && (
+              <span className="chat-btn-badge">{unreadCount}</span>
+            )}
+          </button>
           <UserMenu onLoginClick={onLoginClick} />
           <button
             className="settings-btn"

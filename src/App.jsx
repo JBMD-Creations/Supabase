@@ -7,6 +7,7 @@ import { SaveProvider } from './contexts/SaveContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { SupabaseDataProvider } from './contexts/SupabaseDataContext';
 import { NotificationProvider } from './contexts/NotificationContext';
+import { TeamChatProvider } from './contexts/TeamChatContext';
 import MainLayout from './components/layout/MainLayout';
 import PatientCharting from './components/charting/PatientCharting';
 import OperationsPage from './components/operations/OperationsPage';
@@ -14,6 +15,7 @@ import ReportsPage from './components/reports/ReportsPage';
 import AnalyticsPage from './components/analytics/AnalyticsPage';
 import AuthModal from './components/auth/AuthModal';
 import NotificationPanel from './components/notifications/NotificationPanel';
+import TeamChatPanel from './components/team-chat/TeamChatPanel';
 import './styles/hdflowsheet.css';
 
 function App() {
@@ -41,24 +43,27 @@ function App() {
         <ThemeProvider>
           <PatientProvider>
             <NotificationProvider>
-              <OperationsProvider>
-                <SnippetProvider>
-                  <SaveProvider>
-                    <MainLayout
-                      activeTab={activeTab}
-                      onTabChange={setActiveTab}
-                      onLoginClick={() => setShowAuthModal(true)}
-                    >
-                      {renderContent()}
-                    </MainLayout>
-                    <AuthModal
-                      isOpen={showAuthModal}
-                      onClose={() => setShowAuthModal(false)}
-                    />
-                    <NotificationPanel />
-                  </SaveProvider>
-                </SnippetProvider>
-              </OperationsProvider>
+              <TeamChatProvider>
+                <OperationsProvider>
+                  <SnippetProvider>
+                    <SaveProvider>
+                      <MainLayout
+                        activeTab={activeTab}
+                        onTabChange={setActiveTab}
+                        onLoginClick={() => setShowAuthModal(true)}
+                      >
+                        {renderContent()}
+                      </MainLayout>
+                      <AuthModal
+                        isOpen={showAuthModal}
+                        onClose={() => setShowAuthModal(false)}
+                      />
+                      <NotificationPanel />
+                      <TeamChatPanel />
+                    </SaveProvider>
+                  </SnippetProvider>
+                </OperationsProvider>
+              </TeamChatProvider>
             </NotificationProvider>
           </PatientProvider>
         </ThemeProvider>
