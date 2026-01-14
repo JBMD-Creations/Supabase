@@ -538,11 +538,11 @@ textarea:focus {
 .floating-buttons {
   position: fixed;
   right: 20px;
-  top: 70px;
+  top: 60px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  z-index: 999;
+  gap: 8px;
+  z-index: 900;
 }
 
 .floating-btn {
