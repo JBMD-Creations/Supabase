@@ -111,17 +111,30 @@ export const OperationsProvider = ({ children }) => {
       const isCloudId = checklist.id > 1000000;
 
       if (isCloudId) {
-        // Update existing
+        // Update existing - use maybeSingle() to handle case where row doesn't exist
         const { data, error } = await supabase
           .from('checklists')
           .update(checklistData)
           .eq('id', checklist.id)
           .eq('user_id', user.id)
           .select()
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
-        savedChecklist = data;
+
+        // If update returned no rows, the checklist doesn't exist - insert instead
+        if (!data) {
+          const { data: insertedData, error: insertError } = await supabase
+            .from('checklists')
+            .insert(checklistData)
+            .select()
+            .single();
+
+          if (insertError) throw insertError;
+          savedChecklist = insertedData;
+        } else {
+          savedChecklist = data;
+        }
       } else {
         // Insert new
         const { data, error } = await supabase
