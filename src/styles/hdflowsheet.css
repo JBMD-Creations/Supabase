@@ -1,3 +1,26 @@
+/*
+ * ==========================================================================
+ * HDFLOWSHEET.CSS - LEGACY GLOBAL STYLES
+ * ==========================================================================
+ *
+ * WARNING: This is a legacy monolithic stylesheet. Component-specific styles
+ * should be added to component CSS files instead (e.g., PatientCharting.css).
+ *
+ * This file should ONLY contain:
+ *   - CSS custom properties (theme variables in :root)
+ *   - Global resets and base styles
+ *   - Page wrapper classes (.pt-charting-page, .operations-page, etc.)
+ *   - Truly global utilities
+ *
+ * DO NOT add these to this file (use component CSS instead):
+ *   - .floating-buttons, .floating-btn (use PatientCharting.css)
+ *   - .shift-tab, .shift-tabs (use PatientCharting.css)
+ *   - Modal styles (use component-specific modal CSS)
+ *   - Any component-specific styling
+ *
+ * ==========================================================================
+ */
+
         /* ========== THEME CSS VARIABLES ========== */
         :root {
             /* Default Theme: Clinical Blue */
@@ -3536,39 +3559,8 @@
             color: #e53e3e;
         }
         
-        /* Floating Buttons Container - positioned below header to avoid nav overlap */
-        .floating-buttons {
-            position: fixed;
-            right: 20px;
-            top: 200px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 900;
-        }
-        
-        .floating-btn {
-            background: #5B9BD5;
-            color: white;
-            border: none;
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 0.9em;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(91, 155, 213, 0.4);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            white-space: nowrap;
-        }
-
-        .floating-btn:hover {
-            background: #4A8BC5;
-            transform: translateX(-3px);
-            box-shadow: 0 6px 16px rgba(91, 155, 213, 0.5);
-        }
+        /* NOTE: .floating-buttons and .floating-btn styles moved to PatientCharting.css */
+        /* Do not add floating button styles here - use component CSS instead */
 
         /* Bottom Center Floating Button */
         .floating-btn-bottom {
@@ -5162,56 +5154,9 @@
         }
         
         /* Shift Tabs in Main UI */
-        .shift-tabs-container {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 10px;
-            padding: 8px 12px;
-            background: rgba(255,255,255,0.15);
-            border-radius: 8px;
-            align-items: center;
-        }
-        .shift-tabs-container #shiftTabs {
-            display: flex;
-            gap: 8px;
-        }
-        .shift-tabs-label {
-            color: rgba(255,255,255,0.8);
-            font-size: 0.85em;
-            font-weight: 600;
-            margin-right: 8px;
-        }
-        .shift-tab {
-            padding: 8px 16px;
-            background: rgba(255,255,255,0.2);
-            border: 2px solid transparent;
-            border-radius: 6px;
-            color: white;
-            font-weight: 600;
-            font-size: 0.9em;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .shift-tab:hover {
-            background: rgba(255,255,255,0.3);
-        }
-        .shift-tab.active {
-            background: white;
-            color: var(--theme-primary);
-            border-color: white;
-        }
-        .shift-tab .shift-count {
-            background: rgba(255,255,255,0.3);
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-size: 0.8em;
-            margin-left: 6px;
-        }
-        .shift-tab.active .shift-count {
-            background: var(--theme-primary-light);
-            color: var(--theme-primary-dark);
-        }
-        
+        /* NOTE: .shift-tabs and .shift-tab styles moved to PatientCharting.css */
+        /* Do not add shift tab styles here - use component CSS instead */
+
         /* Shift tabs in Quick Assign Modal */
         .bulk-assign-shift-tabs {
             display: flex;
