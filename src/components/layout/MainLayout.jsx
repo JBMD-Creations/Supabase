@@ -31,6 +31,12 @@ const MainLayout = ({ activeTab, onTabChange, onLoginClick, children }) => {
           >
             Reports
           </button>
+          <button
+            className={`top-nav-tab ${activeTab === 'analytics' ? 'active' : ''}`}
+            onClick={() => onTabChange('analytics')}
+          >
+            Analytics
+          </button>
         </div>
         <div className="nav-actions">
           <UserMenu onLoginClick={onLoginClick} />

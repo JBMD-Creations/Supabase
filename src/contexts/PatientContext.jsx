@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { useSupabaseData } from './SupabaseDataContext';
 
 const PatientContext = createContext();
 
@@ -19,10 +20,24 @@ const SECTIONS = {
 };
 
 export const PatientProvider = ({ children }) => {
+  const {
+    isAuthenticated,
+    fetchPatients: fetchCloudPatients,
+    savePatient: saveCloudPatient,
+    updatePatientQA: updateCloudPatientQA,
+    deletePatient: deleteCloudPatient,
+    syncStatus,
+    isOnline
+  } = useSupabaseData();
+
   const [patients, setPatients] = useState(() => {
     const saved = localStorage.getItem('hd-patients');
     return saved ? JSON.parse(saved) : [];
   });
+
+  const [cloudSyncEnabled, setCloudSyncEnabled] = useState(true);
+  const [lastCloudSync, setLastCloudSync] = useState(null);
+  const syncDebounceRef = useRef(null);
 
   const [activePatientId, setActivePatientId] = useState(null);
   const [activePod, setActivePod] = useState(null);
@@ -43,6 +58,61 @@ export const PatientProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('hd-next-id', nextId.toString());
   }, [nextId]);
+
+  // Load patients from cloud when authenticated
+  useEffect(() => {
+    const loadCloudPatients = async () => {
+      if (isAuthenticated && cloudSyncEnabled && isOnline) {
+        try {
+          const cloudPatients = await fetchCloudPatients();
+          if (cloudPatients && cloudPatients.length > 0) {
+            // Merge cloud patients with local (cloud takes precedence for matching IDs)
+            setPatients(prev => {
+              const localOnlyPatients = prev.filter(
+                local => !cloudPatients.some(cloud => cloud.id === local.id)
+              );
+              // Update local IDs to avoid conflicts
+              const updatedLocalPatients = localOnlyPatients.map(p => ({
+                ...p,
+                id: typeof p.id === 'number' && p.id < 1000000 ? p.id + Date.now() : p.id
+              }));
+              return [...cloudPatients, ...updatedLocalPatients];
+            });
+            setLastCloudSync(new Date());
+          }
+        } catch (error) {
+          console.error('Failed to load cloud patients:', error);
+        }
+      }
+    };
+
+    loadCloudPatients();
+  }, [isAuthenticated, cloudSyncEnabled, isOnline, fetchCloudPatients]);
+
+  // Sync patient to cloud with debouncing
+  const syncPatientToCloud = useCallback(async (patient) => {
+    if (!isAuthenticated || !cloudSyncEnabled || !isOnline) return;
+
+    // Debounce sync to avoid too many requests
+    if (syncDebounceRef.current) {
+      clearTimeout(syncDebounceRef.current);
+    }
+
+    syncDebounceRef.current = setTimeout(async () => {
+      try {
+        const cloudId = await saveCloudPatient(patient);
+        if (cloudId && cloudId !== patient.id) {
+          // Update local patient with cloud ID
+          setPatients(prev =>
+            prev.map(p => p.id === patient.id ? { ...p, id: cloudId } : p)
+          );
+        }
+        setLastCloudSync(new Date());
+      } catch (error) {
+        console.error('Failed to sync patient to cloud:', error);
+      }
+    }, 1000); // 1 second debounce
+  }, [isAuthenticated, cloudSyncEnabled, isOnline, saveCloudPatient]);
 
   // Add patient
   const addPatient = (patientData) => {
@@ -96,14 +166,29 @@ export const PatientProvider = ({ children }) => {
 
     setPatients(prev => [...prev, newPatient]);
     setNextId(prev => prev + 1);
+
+    // Sync to cloud
+    syncPatientToCloud(newPatient);
+
     return newPatient;
   };
 
   // Update patient
   const updatePatient = (patientId, updates) => {
-    setPatients(prev =>
-      prev.map(p => (p.id === patientId ? { ...p, ...updates } : p))
-    );
+    setPatients(prev => {
+      const updated = prev.map(p => (p.id === patientId ? { ...p, ...updates } : p));
+      // Find the updated patient and sync to cloud
+      const updatedPatient = updated.find(p => p.id === patientId);
+      if (updatedPatient) {
+        syncPatientToCloud(updatedPatient);
+
+        // If QA was updated, also sync QA specifically
+        if (updates.qa && isAuthenticated && cloudSyncEnabled) {
+          updateCloudPatientQA(patientId, updatedPatient.qa);
+        }
+      }
+      return updated;
+    });
   };
 
   // Delete patient
@@ -111,6 +196,11 @@ export const PatientProvider = ({ children }) => {
     setPatients(prev => prev.filter(p => p.id !== patientId));
     if (activePatientId === patientId) {
       setActivePatientId(null);
+    }
+
+    // Delete from cloud
+    if (isAuthenticated && cloudSyncEnabled) {
+      deleteCloudPatient(patientId);
     }
   };
 
@@ -218,7 +308,13 @@ export const PatientProvider = ({ children }) => {
     getFilteredPatients,
     getPatientsByPod,
     getPatientsBySection,
-    clearAllPatients
+    clearAllPatients,
+    // Cloud sync
+    cloudSyncEnabled,
+    setCloudSyncEnabled,
+    lastCloudSync,
+    isCloudConnected: isAuthenticated && isOnline,
+    syncStatus
   };
 
   return (

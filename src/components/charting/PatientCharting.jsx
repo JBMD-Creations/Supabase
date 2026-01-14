@@ -2,22 +2,34 @@ import { useState } from 'react';
 import { usePatients } from '../../contexts/PatientContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useSave } from '../../contexts/SaveContext';
+import { useNotifications } from '../../contexts/NotificationContext';
 import PatientCard from './PatientCard';
 import AddPatientModal from './AddPatientModal';
 import ExcelImportModal from './ExcelImportModal';
 import SnippetsSidePanel from './SnippetsSidePanel';
 import QuickAssignModal from './QuickAssignModal';
+import QuickNotesModal from './QuickNotesModal';
 import './PatientCharting.css';
 
 const PatientCharting = () => {
-  const { patients, getFilteredPatients, activeShift, setActiveShift, selectedShifts, setSelectedShifts } = usePatients();
+  const { patients, getFilteredPatients, activeShift, setActiveShift, selectedShifts, setSelectedShifts, isCloudConnected, lastCloudSync } = usePatients();
   const { technicians } = useTheme();
   const { saveAll, saveStatus, SAVE_STATUS, hasUnsavedChanges, lastSaved, autoSaveEnabled } = useSave();
+  const { summary: alertSummary, setShowNotificationPanel, SEVERITY } = useNotifications();
   const [showAddModal, setShowAddModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showSnippets, setShowSnippets] = useState(false);
   const [showQuickAssign, setShowQuickAssign] = useState(false);
+  const [showQuickNotes, setShowQuickNotes] = useState(false);
   const [activePatientId, setActivePatientId] = useState(null);
+
+  // Get alert button class based on severity
+  const getAlertButtonClass = () => {
+    if (alertSummary.critical > 0) return 'alert-btn has-critical';
+    if (alertSummary.warning > 0) return 'alert-btn has-warning';
+    if (alertSummary.info > 0) return 'alert-btn has-info';
+    return 'alert-btn no-alerts';
+  };
 
   // Get save button text and class based on status
   const getSaveButtonContent = () => {
@@ -61,6 +73,11 @@ const PatientCharting = () => {
           </h1>
           <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '14px' }}>
             Active Shift: {activeShift} | Patients: {filteredPatients.length} | Technicians: {technicians.length}
+            {isCloudConnected && (
+              <span style={{ marginLeft: '12px', background: 'rgba(16, 185, 129, 0.3)', padding: '2px 8px', borderRadius: '4px' }}>
+                ☁️ Cloud Synced
+              </span>
+            )}
           </p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
@@ -157,6 +174,15 @@ const PatientCharting = () => {
       {/* Floating Buttons - Top Right (matches HDFlowsheet structure) */}
       <div className="floating-buttons">
         <button
+          className={`floating-btn ${getAlertButtonClass()}`}
+          onClick={() => setShowNotificationPanel(true)}
+        >
+          🔔 Alerts
+          {alertSummary.total > 0 && (
+            <span className="notification-badge">{alertSummary.total}</span>
+          )}
+        </button>
+        <button
           className="floating-btn"
           onClick={() => setShowSnippets(!showSnippets)}
         >
@@ -170,7 +196,7 @@ const PatientCharting = () => {
         </button>
         <button
           className="floating-btn"
-          onClick={() => {/* TODO: Quick Notes */}}
+          onClick={() => setShowQuickNotes(true)}
         >
           📝 Quick Notes
         </button>
@@ -182,6 +208,12 @@ const PatientCharting = () => {
           {saveButton.text}
         </button>
       </div>
+
+      {/* Quick Notes Modal */}
+      <QuickNotesModal
+        isOpen={showQuickNotes}
+        onClose={() => setShowQuickNotes(false)}
+      />
 
       {/* Auto-save indicator */}
       {autoSaveEnabled && (

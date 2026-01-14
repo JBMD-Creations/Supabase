@@ -6,11 +6,14 @@ import { SnippetProvider } from './contexts/SnippetContext';
 import { SaveProvider } from './contexts/SaveContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { SupabaseDataProvider } from './contexts/SupabaseDataContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import MainLayout from './components/layout/MainLayout';
 import PatientCharting from './components/charting/PatientCharting';
 import OperationsPage from './components/operations/OperationsPage';
 import ReportsPage from './components/reports/ReportsPage';
+import AnalyticsPage from './components/analytics/AnalyticsPage';
 import AuthModal from './components/auth/AuthModal';
+import NotificationPanel from './components/notifications/NotificationPanel';
 import './styles/hdflowsheet.css';
 
 function App() {
@@ -25,6 +28,8 @@ function App() {
         return <OperationsPage />;
       case 'reports':
         return <ReportsPage />;
+      case 'analytics':
+        return <AnalyticsPage />;
       default:
         return <PatientCharting />;
     }
@@ -35,23 +40,26 @@ function App() {
       <SupabaseDataProvider>
         <ThemeProvider>
           <PatientProvider>
-            <OperationsProvider>
-              <SnippetProvider>
-                <SaveProvider>
-                  <MainLayout
-                    activeTab={activeTab}
-                    onTabChange={setActiveTab}
-                    onLoginClick={() => setShowAuthModal(true)}
-                  >
-                    {renderContent()}
-                  </MainLayout>
-                  <AuthModal
-                    isOpen={showAuthModal}
-                    onClose={() => setShowAuthModal(false)}
-                  />
-                </SaveProvider>
-              </SnippetProvider>
-            </OperationsProvider>
+            <NotificationProvider>
+              <OperationsProvider>
+                <SnippetProvider>
+                  <SaveProvider>
+                    <MainLayout
+                      activeTab={activeTab}
+                      onTabChange={setActiveTab}
+                      onLoginClick={() => setShowAuthModal(true)}
+                    >
+                      {renderContent()}
+                    </MainLayout>
+                    <AuthModal
+                      isOpen={showAuthModal}
+                      onClose={() => setShowAuthModal(false)}
+                    />
+                    <NotificationPanel />
+                  </SaveProvider>
+                </SnippetProvider>
+              </OperationsProvider>
+            </NotificationProvider>
           </PatientProvider>
         </ThemeProvider>
       </SupabaseDataProvider>
