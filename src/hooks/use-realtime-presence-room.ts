@@ -2,7 +2,7 @@
 
 import { useCurrentUserImage } from '@/hooks/use-current-user-image'
 import { useCurrentUserName } from '@/hooks/use-current-user-name'
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '../lib/supabase'
 import { REALTIME_SUBSCRIBE_STATES } from '@supabase/supabase-js'
 import { useEffect, useState } from 'react'
 
