@@ -8,6 +8,7 @@ import AddPatientModal from './AddPatientModal';
 import ExcelImportModal from './ExcelImportModal';
 import SnippetsSidePanel from './SnippetsSidePanel';
 import QuickAssignModal from './QuickAssignModal';
+import QuickNotesModal from './QuickNotesModal';
 import './PatientCharting.css';
 
 const PatientCharting = () => {
@@ -19,6 +20,8 @@ const PatientCharting = () => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [showSnippets, setShowSnippets] = useState(false);
   const [showQuickAssign, setShowQuickAssign] = useState(false);
+  const [showQuickNotes, setShowQuickNotes] = useState(false);
+  const [quickNotesPatientId, setQuickNotesPatientId] = useState(null);
   const [activePatientId, setActivePatientId] = useState(null);
 
   // Get alert button class based on severity
@@ -48,6 +51,16 @@ const PatientCharting = () => {
   const saveButton = getSaveButtonContent();
 
   const filteredPatients = getFilteredPatients();
+
+  // Open Quick Notes for a specific patient
+  const openQuickNotes = (patientId = null) => {
+    // Use provided patientId, or activePatientId, or first patient
+    const targetId = patientId || activePatientId || (filteredPatients.length > 0 ? filteredPatients[0].id : null);
+    if (targetId) {
+      setQuickNotesPatientId(targetId);
+      setShowQuickNotes(true);
+    }
+  };
 
   // Group patients by pod
   const patientsByPod = {};
@@ -169,6 +182,13 @@ const PatientCharting = () => {
         onClose={() => setShowQuickAssign(false)}
       />
 
+      {/* Quick Notes Modal - Per-patient notes (matches HDFlowsheet reference) */}
+      <QuickNotesModal
+        isOpen={showQuickNotes}
+        onClose={() => setShowQuickNotes(false)}
+        patientId={quickNotesPatientId}
+      />
+
       {/* Floating Buttons - Top Right (matches HDFlowsheet structure) */}
       <div className="floating-buttons">
         <button
@@ -191,6 +211,12 @@ const PatientCharting = () => {
           onClick={() => setShowQuickAssign(true)}
         >
           👥 Quick Assign
+        </button>
+        <button
+          className="floating-btn"
+          onClick={() => openQuickNotes()}
+        >
+          📝 Quick Notes
         </button>
         <button
           className={`floating-btn save-btn ${saveButton.className}`}
