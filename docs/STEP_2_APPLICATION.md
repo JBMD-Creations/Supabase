@@ -1,23 +1,16 @@
-# Complete Setup Guide: xCloud + Supabase + Shadcn UI + Claude Code + GitHub
+# Step 2: Application Development
 
-A beginner-friendly guide to building modern React applications with real-time features. This guide assumes you've never used these tools before.
+> **Navigation**: [Wiki Home](../WIKI.md) | [Step 1: Infrastructure Setup](./STEP_1_INFRASTRUCTURE.md) | **Step 2**
 
 ---
 
-## Table of Contents
+## Overview
 
-1. [What Are These Tools?](#what-are-these-tools)
-2. [Prerequisites](#prerequisites)
-3. [Part 1: Setting Up xCloud + Supabase](#part-1-setting-up-xcloud--supabase)
-4. [Part 2: Setting Up Your React Project](#part-2-setting-up-your-react-project)
-5. [Part 3: Installing Tailwind CSS](#part-3-installing-tailwind-css)
-6. [Part 4: Installing Shadcn UI Components](#part-4-installing-shadcn-ui-components)
-7. [Part 5: Connecting to Supabase](#part-5-connecting-to-supabase)
-8. [Part 6: Setting Up Authentication](#part-6-setting-up-authentication)
-9. [Part 7: Adding Shadcn UI Components](#part-7-adding-shadcn-ui-components)
-10. [Part 8: Real-Time Features](#part-8-real-time-features)
-11. [Part 9: Deployment](#part-9-deployment)
-12. [Troubleshooting](#troubleshooting)
+This guide covers building your frontend application: React project setup, Tailwind CSS, Shadcn UI components, Supabase client connection, authentication, and real-time features.
+
+**Prerequisites**: Complete [Step 1: Infrastructure Setup](./STEP_1_INFRASTRUCTURE.md) first. You need a running Supabase instance to connect to.
+
+**Estimated time**: 45-90 minutes
 
 ---
 
@@ -37,6 +30,21 @@ Before we start, let's understand what each tool does:
 
 ---
 
+## Table of Contents
+
+1. [Prerequisites](#prerequisites)
+2. [Setting Up Your React Project](#part-2-setting-up-your-react-project)
+3. [Installing Tailwind CSS](#part-3-installing-tailwind-css)
+4. [Installing Shadcn UI Components](#part-4-installing-shadcn-ui-components)
+5. [Connecting to Supabase](#part-5-connecting-to-supabase)
+6. [Setting Up Authentication](#part-6-setting-up-authentication)
+7. [Adding Shadcn UI Components](#part-7-adding-shadcn-ui-components)
+8. [Real-Time Features](#part-8-real-time-features)
+9. [Deployment](#part-9-deployment)
+10. [Troubleshooting](#troubleshooting)
+
+---
+
 ## Prerequisites
 
 Before starting, you need:
@@ -50,156 +58,21 @@ Before starting, you need:
 
 ---
 
-## Part 1: Setting Up xCloud + Supabase
+## Before You Begin: Infrastructure Setup
 
-### Step 1.1: Create a Server on xCloud
-
-1. Log into your xCloud Dashboard
-2. Click **"New Server"**
-3. Choose your cloud provider:
-   - **Hetzner** (recommended - good price/performance)
-   - Linode, Vultr, DigitalOcean also work
-4. Configure your server:
-   - **Server Name**: `supabase-server` (or any name you like)
-   - **App Type**: Supabase
-   - **Stack**: Docker + NGINX (required)
-5. Click **Create** and wait 5-10 minutes for provisioning
-
-### Step 1.2: Deploy Supabase
-
-1. Go to **Sites** → **Add New Site**
-2. Select your Docker + Nginx server
-3. Choose **One Click Apps** → **Supabase**
-4. Configure:
-   - **Site Title**: Your app name
-   - **Domain**: `yourdomain.com`
-5. **IMPORTANT**: Copy and save these credentials:
-   - Admin Username
-   - Admin Password
-   - ANON_KEY (you'll need this later!)
-6. Click **Next** and complete setup
-
-### Step 1.3: Note Your Port Numbers
-
-Find these in **xCloud** → **Sites** → **Your Site** → **Supabase** → **Environment**:
-
-```
-SUPABASE_STUDIO_PORT=18010      # Dashboard
-SUPABASE_KONG_HTTP_PORT=18011   # API
-SUPABASE_KONG_HTTPS_PORT=18012  # API (HTTPS)
-SUPABASE_POSTGRES_PORT=18013    # Database
-SUPABASE_ANALYTICS_PORT=18014   # Analytics
-```
-
-### Step 1.4: Configure Nginx Reverse Proxy
-
-**Why?** Supabase Docker containers only accept connections from localhost. Nginx forwards external requests to them.
-
-1. Go to **xCloud** → **Sites** → **Your Site** → **Tools** → **Nginx Customization**
-2. Click **Create Custom Nginx Configuration**
-3. Configure:
-   - **Template**: Use My Own Config
-   - **Config Type**: Inside Server Block
-   - **File Name**: `supabase-proxy`
-4. Paste this configuration:
-
-```nginx
-# REST API (Database queries)
-location /rest/v1/ {
-    proxy_pass http://127.0.0.1:18011/rest/v1/;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-    proxy_set_header Authorization $http_authorization;
-    proxy_pass_header Authorization;
-}
-
-# Auth API (Login, signup, etc.)
-location /auth/v1/ {
-    proxy_pass http://127.0.0.1:18011/auth/v1/;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-    proxy_set_header Authorization $http_authorization;
-    proxy_pass_header Authorization;
-}
-
-# Storage API (File uploads)
-location /storage/v1/ {
-    proxy_pass http://127.0.0.1:18011/storage/v1/;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-    proxy_set_header Authorization $http_authorization;
-    proxy_pass_header Authorization;
-}
-
-# Realtime API (WebSockets for live updates)
-location /realtime/v1/ {
-    proxy_pass http://127.0.0.1:18011/realtime/v1/;
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection "upgrade";
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-}
-```
-
-5. Click **Run & Debug** to test
-6. Click **Save Config**
-
-### Step 1.5: Configure Firewalls
-
-You need to configure **TWO** firewalls:
-
-#### xCloud Firewall:
-1. Go to **xCloud** → **Servers** → **Your Server** → **Security** → **Firewall Management**
-2. Click **Add New Rule**
-3. Add:
-   - **Name**: `Supabase Ports`
-   - **Port**: `18010:18014` (colon means range)
-   - **Protocol**: TCP
-   - **Traffic**: Allow
-4. Save
-
-#### Cloud Provider Firewall (Hetzner example):
-1. Log into Hetzner Console
-2. Go to **Servers** → **Your Server** → **Firewalls**
-3. Add inbound rule for ports `18010-18014` TCP
-4. Apply to your server
-
-### Step 1.6: Configure Cloudflare DNS
-
-1. Log into Cloudflare Dashboard
-2. Select your domain
-3. Go to **DNS** → **Records**
-4. Add an A record:
-   - **Type**: A
-   - **Name**: `@` (or your subdomain)
-   - **Content**: Your server's IP address
-   - **Proxy status**: Proxied (orange cloud)
-5. Go to **SSL/TLS** and set mode to **Full**
-
-### Step 1.7: Test Your Setup
-
-Visit `https://yourdomain.com/rest/v1/` in your browser.
-
-**Expected result**:
-```
-Kong Error
-No API key found in request.
-```
-
-This error means SUCCESS! The API is working - it just needs authentication.
+> **Important**: Before building your application, you need a running Supabase backend.
+>
+> Complete **[Step 1: Infrastructure Setup](./STEP_1_INFRASTRUCTURE.md)** first to set up:
+> - xCloud server with Supabase
+> - Nginx reverse proxy configuration
+> - Firewall rules
+> - Cloudflare DNS and SSL
+>
+> Once your backend is running and you can access `https://yourdomain.com/rest/v1/` (showing a "Kong Error - No API key found" message), you're ready to continue.
 
 ---
 
-## Part 2: Setting Up Your React Project
+## Part 1: Setting Up Your React Project
 
 ### Step 2.1: Create a New Project
 
@@ -1194,16 +1067,33 @@ npm run preview
 
 This guide covered:
 
-1. **xCloud + Supabase Setup** - Creating servers, configuring nginx, firewalls, and DNS
-2. **React Project Setup** - Creating a Vite project with proper structure
-3. **Tailwind CSS** - Installing and configuring CSS framework
-4. **Shadcn UI** - Adding beautiful, accessible UI components
-5. **Supabase Connection** - Connecting your app to the backend
-6. **Authentication** - User login/signup system
-7. **Real-Time Features** - Chat, cursors, and presence
-8. **Deployment** - Getting your app live
+1. **React Project Setup** - Creating a Vite project with proper structure
+2. **Tailwind CSS** - Installing and configuring CSS framework
+3. **Shadcn UI** - Adding beautiful, accessible UI components
+4. **Supabase Connection** - Connecting your app to the backend
+5. **Authentication** - User login/signup system
+6. **Real-Time Features** - Chat, cursors, and presence
+7. **Deployment** - Getting your app live
 
 You now have a complete, modern web application stack!
+
+---
+
+## What's Next?
+
+As this wiki grows, additional guides will be added for:
+- Database schema design and migrations
+- Advanced real-time patterns
+- File storage and uploads
+- Edge functions
+- Testing strategies
+- Performance optimization
+
+Check the [Wiki Home](../WIKI.md) for the latest documentation.
+
+---
+
+> **Navigation**: [Wiki Home](../WIKI.md) | [Step 1: Infrastructure Setup](./STEP_1_INFRASTRUCTURE.md) | **Step 2**
 
 ---
 
