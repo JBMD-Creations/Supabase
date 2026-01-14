@@ -396,7 +396,7 @@ export const SnippetProvider = ({ children }) => {
   }, [isAuthenticated, user, fetchCloudSnippets]);
 
   // Get active configuration (with fallback to first config or defaults)
-  const getActiveConfig = () => {
+  const getActiveConfig = useCallback(() => {
     let config = configurations.find(c => c.id === activeConfigId);
 
     // Fallback to first available config if active not found
@@ -428,7 +428,7 @@ export const SnippetProvider = ({ children }) => {
     });
 
     return { ...config, sections: sectionsWithSnippets };
-  };
+  }, [configurations, activeConfigId]);
 
   // Get all unique tags
   const getAllTags = () => {
