@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS patients (
   start_time TEXT,
   end_time TEXT,
   notes TEXT,
+  quick_notes TEXT,
   hospitalized JSONB DEFAULT '{"isHosp": false, "hospital": ""}',
   missed_tx JSONB DEFAULT '{"isMissed": false, "type": ""}',
   wheelchair_weight JSONB DEFAULT '{}',

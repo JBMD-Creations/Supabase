@@ -68,6 +68,7 @@ export const SupabaseDataProvider = ({ children }) => {
         startTime: patient.start_time,
         endTime: patient.end_time,
         notes: patient.notes,
+        quickNotes: patient.quick_notes || '',
         hospitalized: patient.hospitalized || { isHosp: false, hospital: '' },
         missedTx: patient.missed_tx || { isMissed: false, type: '' },
         wheelchairWeight: patient.wheelchair_weight || {},
@@ -120,6 +121,7 @@ export const SupabaseDataProvider = ({ children }) => {
         start_time: patient.startTime,
         end_time: patient.endTime,
         notes: patient.notes,
+        quick_notes: patient.quickNotes,
         hospitalized: patient.hospitalized,
         missed_tx: patient.missedTx,
         wheelchair_weight: patient.wheelchairWeight,
@@ -128,20 +130,55 @@ export const SupabaseDataProvider = ({ children }) => {
 
       let savedPatient;
 
-      if (patient.id && typeof patient.id === 'number' && patient.id > 0) {
-        // Update existing
+      // Check if patient has a cloudId (previously synced) or if the ID is large (from Supabase)
+      // Local IDs are small (1, 2, 3...), Supabase bigint IDs are large
+      const hasCloudId = patient.cloudId || (typeof patient.id === 'number' && patient.id > 1000000);
+
+      if (hasCloudId) {
+        // Update existing cloud patient
+        const cloudIdToUse = patient.cloudId || patient.id;
         const { data, error } = await supabase
           .from('patients')
           .update(patientData)
-          .eq('id', patient.id)
+          .eq('id', cloudIdToUse)
           .eq('user_id', user.id)
           .select()
           .single();
 
-        if (error) throw error;
-        savedPatient = data;
+        if (error) {
+          // If update fails (patient doesn't exist in cloud), insert it
+          if (error.code === 'PGRST116') {
+            const { data: insertData, error: insertError } = await supabase
+              .from('patients')
+              .insert(patientData)
+              .select()
+              .single();
+
+            if (insertError) throw insertError;
+            savedPatient = insertData;
+
+            // Create QA record for new patient
+            await supabase.from('patient_qa').insert({
+              patient_id: savedPatient.id,
+              pre_check: patient.qa?.preCheck || false,
+              thirty_min: patient.qa?.thirtyMin || false,
+              meds: patient.qa?.meds || false,
+              abx_idpn: patient.qa?.abxIdpn || false,
+              stat_labs: patient.qa?.statLabs || false,
+              missed_tx: patient.qa?.missedTx || '',
+              whiteboard: patient.qa?.whiteboard || false,
+              labs_prep: patient.qa?.labsPrep || false,
+              ett_signed: patient.qa?.ettSigned || false,
+              chart_closed: patient.qa?.chartClosed || false
+            });
+          } else {
+            throw error;
+          }
+        } else {
+          savedPatient = data;
+        }
       } else {
-        // Insert new
+        // Insert new patient to cloud
         const { data, error } = await supabase
           .from('patients')
           .insert(patientData)
@@ -167,6 +204,7 @@ export const SupabaseDataProvider = ({ children }) => {
         });
       }
 
+      console.log('Patient saved to cloud with ID:', savedPatient.id);
       return savedPatient.id;
     } catch (err) {
       console.error('Error saving patient:', err);

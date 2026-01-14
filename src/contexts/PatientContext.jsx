@@ -131,6 +131,7 @@ export const PatientProvider = ({ children }) => {
       startTime: patientData.startTime || '',
       endTime: patientData.endTime || '',
       notes: patientData.notes || '',
+      quickNotes: patientData.quickNotes || '',
       qa: {
         preCheck: false,
         thirtyMin: false,
@@ -206,8 +207,8 @@ export const PatientProvider = ({ children }) => {
 
   // Bulk import patients (from Excel)
   const importPatients = (patientsData) => {
-    const newPatients = patientsData.map(data => {
-      const id = nextId + patientsData.indexOf(data);
+    const newPatients = patientsData.map((data, index) => {
+      const id = nextId + index;
       return {
         id,
         name: data.name || '',
@@ -223,6 +224,7 @@ export const PatientProvider = ({ children }) => {
         startTime: '',
         endTime: '',
         notes: '',
+        quickNotes: '',
         qa: {
           preCheck: false,
           thirtyMin: false,
@@ -257,6 +259,11 @@ export const PatientProvider = ({ children }) => {
 
     setPatients(prev => [...prev, ...newPatients]);
     setNextId(prev => prev + newPatients.length);
+
+    // Sync each imported patient to cloud
+    newPatients.forEach(patient => {
+      syncPatientToCloud(patient);
+    });
   };
 
   // Get filtered patients
