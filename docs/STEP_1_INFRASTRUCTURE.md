@@ -1,6 +1,16 @@
-# Complete Guide: Setting Up Supabase Authentication with xCloud, Vercel & React
+# Step 1: Infrastructure Setup
 
-This guide documents the complete process of setting up Supabase authentication for a React app hosted on Vercel, with Supabase running on xCloud (Hetzner). This was a challenging setup due to Docker networking, firewall configurations, and reverse proxy requirements.
+> **Navigation**: [Wiki Home](../WIKI.md) | **Step 1** | [Step 2: Application Development](./STEP_2_APPLICATION.md)
+
+---
+
+## Overview
+
+This guide covers setting up your backend infrastructure: xCloud server, Supabase deployment, nginx reverse proxy, firewalls, and DNS configuration.
+
+**Why do this first?** Your React application needs a backend to connect to. Without the infrastructure in place, you can't test authentication, database queries, or real-time features.
+
+**Estimated time**: 30-60 minutes
 
 ---
 
@@ -785,5 +795,17 @@ If you encounter issues:
 
 ---
 
-*Last updated: January 13, 2026*
+## Next Steps
+
+Once your infrastructure is running and you can access the API, proceed to:
+
+**[Step 2: Application Development](./STEP_2_APPLICATION.md)** - Build your React frontend with Tailwind CSS, Shadcn UI, and real-time features.
+
+---
+
+> **Navigation**: [Wiki Home](../WIKI.md) | **Step 1** | [Step 2: Application Development](./STEP_2_APPLICATION.md)
+
+---
+
+*Last updated: January 14, 2026*
 *Created with Claude Code assistance*
