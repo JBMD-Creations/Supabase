@@ -534,11 +534,11 @@ textarea:focus {
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-/* Floating Buttons Container - Top Right (matches HDFlowsheet) */
+/* Floating Buttons Container - Right side below header */
 .floating-buttons {
   position: fixed;
   right: 20px;
-  top: 60px;
+  top: 200px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -571,7 +571,7 @@ textarea:focus {
 @media (max-width: 768px) {
   .floating-buttons {
     right: 10px;
-    top: 120px;
+    top: 280px;
   }
 
   .floating-btn {
