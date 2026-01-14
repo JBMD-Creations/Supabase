@@ -3536,15 +3536,15 @@
             color: #e53e3e;
         }
         
-        /* Floating Buttons Container */
+        /* Floating Buttons Container - positioned below header to avoid nav overlap */
         .floating-buttons {
             position: fixed;
             right: 20px;
-            top: 20px;
+            top: 200px;
             display: flex;
             flex-direction: column;
             gap: 10px;
-            z-index: 999;
+            z-index: 900;
         }
         
         .floating-btn {
