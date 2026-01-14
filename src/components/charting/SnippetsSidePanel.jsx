@@ -1,17 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useSnippets } from '../../contexts/SnippetContext';
 import './SnippetsSidePanel.css';
 
 const SnippetsSidePanel = ({ isOpen, onClose }) => {
   const { getActiveConfig } = useSnippets();
-  const activeConfig = getActiveConfig();
+
+  // Memoize activeConfig to prevent infinite re-renders
+  const activeConfig = useMemo(() => getActiveConfig(), [getActiveConfig]);
+
+  // Track if we've initialized expanded sections
+  const initializedRef = useRef(false);
 
   // Initialize with first 3 section IDs (handles both local and cloud IDs)
-  const [expandedSections, setExpandedSections] = useState(() => {
-    const sections = activeConfig?.sections || [];
-    const firstThreeIds = sections.slice(0, 3).map(s => s.id);
-    return new Set(firstThreeIds);
-  });
+  const [expandedSections, setExpandedSections] = useState(new Set([1, 2, 3]));
   const [selectedSnippets, setSelectedSnippets] = useState([]);
   const [generatedNote, setGeneratedNote] = useState('');
   const [bfr, setBfr] = useState(350);
@@ -23,19 +24,14 @@ const SnippetsSidePanel = ({ isOpen, onClose }) => {
   const [targetWeight, setTargetWeight] = useState('');
   const [copied, setCopied] = useState(false);
 
-  // Update expanded sections when config changes (e.g., after cloud sync)
+  // Initialize expanded sections once when config is available
   useEffect(() => {
-    if (activeConfig?.sections?.length > 0) {
-      const currentIds = Array.from(expandedSections);
-      const validIds = activeConfig.sections.map(s => s.id);
-      // If current expanded IDs don't match any section, reset to first 3
-      const hasValidExpanded = currentIds.some(id => validIds.includes(id));
-      if (!hasValidExpanded) {
-        const firstThreeIds = activeConfig.sections.slice(0, 3).map(s => s.id);
-        setExpandedSections(new Set(firstThreeIds));
-      }
+    if (!initializedRef.current && activeConfig?.sections?.length > 0) {
+      const firstThreeIds = activeConfig.sections.slice(0, 3).map(s => s.id);
+      setExpandedSections(new Set(firstThreeIds));
+      initializedRef.current = true;
     }
-  }, [activeConfig]);
+  }, [activeConfig?.sections?.length]);
 
   // Update calculations when weights change
   useEffect(() => {
