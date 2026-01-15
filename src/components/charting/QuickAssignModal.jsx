@@ -4,8 +4,16 @@ import { useTheme } from '../../contexts/ThemeContext';
 import './QuickAssignModal.css';
 
 const QuickAssignModal = ({ isOpen, onClose }) => {
-  const { patients, getFilteredPatients, updatePatient, sections = {} } = usePatients();
-  const { technicians = [] } = useTheme();
+  const patientContext = usePatients();
+  const themeContext = useTheme();
+
+  // Defensive destructuring with fallbacks
+  const patients = patientContext?.patients || [];
+  const getFilteredPatients = patientContext?.getFilteredPatients || (() => []);
+  const updatePatient = patientContext?.updatePatient || (() => {});
+  const sections = patientContext?.sections || {};
+  const technicians = themeContext?.technicians || [];
+
   const [selectedPatients, setSelectedPatients] = useState(new Set());
   const [assignTech, setAssignTech] = useState('');
   const [assignChair, setAssignChair] = useState('');
@@ -14,11 +22,12 @@ const QuickAssignModal = ({ isOpen, onClose }) => {
   const [filterUnassigned, setFilterUnassigned] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredPatients = getFilteredPatients();
+  // Ensure filteredPatients is always an array
+  const filteredPatients = getFilteredPatients() || [];
 
   // Filter patients based on search and unassigned filter
   const displayPatients = useMemo(() => {
-    let result = filteredPatients;
+    let result = Array.isArray(filteredPatients) ? filteredPatients : [];
 
     if (filterUnassigned) {
       result = result.filter(p => !p.tech || !p.chair);
