@@ -14,6 +14,31 @@ This guide covers setting up your backend infrastructure: xCloud server, Supabas
 
 ---
 
+## Using Claude Code for This Setup
+
+> **Good news!** If you're using Claude Code (the AI assistant), many steps in this guide can be automated. Here's what Claude Code can do vs what requires manual action in web dashboards:
+
+| Task | Claude Code Can Help? | Notes |
+|------|----------------------|-------|
+| Create xCloud server | No | Requires xCloud dashboard UI |
+| Deploy Supabase on xCloud | No | Requires xCloud dashboard UI |
+| Configure xCloud firewall | No | Requires xCloud dashboard UI |
+| Configure cloud provider firewall | No | Requires Hetzner/Linode dashboard |
+| Create Nginx config | **Partial** | Claude can generate the config, you paste it in xCloud |
+| Configure Cloudflare DNS | No | Requires Cloudflare dashboard UI |
+| Create React project files | **Yes** | Claude can run `npm create vite` and all setup |
+| Install npm packages | **Yes** | Claude can run `npm install` commands |
+| Create/edit code files | **Yes** | Claude can create all src files directly |
+| Set up `.env` files | **Yes** | Claude can create environment files |
+| Configure Vercel | No | Requires Vercel dashboard for env vars |
+
+**Pro tip**: For the steps Claude Code can automate, just ask! For example:
+- *"Set up a new React project with Vite, Tailwind, and Supabase"*
+- *"Create the auth context and Supabase client files"*
+- *"Install all the Shadcn UI dependencies"*
+
+---
+
 ## Table of Contents
 
 1. [Architecture Overview](#architecture-overview)
@@ -807,5 +832,5 @@ Once your infrastructure is running and you can access the API, proceed to:
 
 ---
 
-*Last updated: January 14, 2026*
+*Last updated: January 15, 2026*
 *Created with Claude Code assistance*

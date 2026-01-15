@@ -10,7 +10,47 @@ This guide covers building your frontend application: React project setup, Tailw
 
 **Prerequisites**: Complete [Step 1: Infrastructure Setup](./STEP_1_INFRASTRUCTURE.md) first. You need a running Supabase instance to connect to.
 
-**Estimated time**: 45-90 minutes
+**Estimated time**: 45-90 minutes (or 10-15 minutes with Claude Code!)
+
+---
+
+## Using Claude Code for This Setup
+
+> **Claude Code can automate nearly ALL of the application setup!** Instead of manually running terminal commands and copy-pasting code, you can ask Claude Code to do it for you.
+
+### What Claude Code Can Do
+
+| Task | Manual Time | With Claude Code |
+|------|-------------|------------------|
+| Create React project | 5 min | Instant |
+| Install all dependencies | 10 min | Instant |
+| Configure Tailwind CSS | 10 min | Instant |
+| Create all component files | 30+ min | Instant |
+| Set up Supabase client | 5 min | Instant |
+| Create auth context | 10 min | Instant |
+| Set up environment files | 5 min | Instant |
+
+### How to Use Claude Code
+
+Simply ask Claude Code to set things up. Example prompts:
+
+1. **Full project setup**: *"Create a new React project with Vite, Tailwind CSS v4, and Supabase. Include the auth context and basic UI components."*
+
+2. **Add specific features**: *"Add the Shadcn UI button, input, and card components to my project"*
+
+3. **Connect to Supabase**: *"Create the Supabase client file and .env with my URL: https://mydomain.com and anon key: eyJ..."*
+
+4. **Add real-time features**: *"Add the real-time chat hook from the guide"*
+
+### What You Still Need to Do Manually
+
+- **Get your Supabase credentials** from xCloud dashboard (ANON_KEY, URL)
+- **Configure Vercel environment variables** in Vercel dashboard
+- **Deploy to Vercel/Netlify** (though Claude can help with build commands)
+
+---
+
+> **Note**: The detailed instructions below are provided as reference. If you're using Claude Code, you can skip the manual steps and just ask Claude to set things up!
 
 ---
 
@@ -74,9 +114,11 @@ Before starting, you need:
 
 ## Part 1: Setting Up Your React Project
 
+> **Claude Code Tip**: Ask *"Create a new Vite React project with TypeScript support and set up the directory structure"* and Claude will run all the commands below for you.
+
 ### Step 2.1: Create a New Project
 
-Open your terminal and run:
+Open your terminal and run (or ask Claude Code to do this):
 
 ```bash
 # Create a new Vite project with React
@@ -154,6 +196,8 @@ mkdir -p src/components/ui src/contexts src/hooks src/lib src/styles
 
 ## Part 3: Installing Tailwind CSS
 
+> **Claude Code Tip**: Ask *"Install and configure Tailwind CSS v4 for my Vite project"* and Claude will handle all the steps below.
+
 ### Step 3.1: Install Tailwind CSS v4
 
 ```bash
@@ -210,6 +254,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 ---
 
 ## Part 4: Installing Shadcn UI Components
+
+> **Claude Code Tip**: Ask *"Install all Shadcn UI dependencies and create the button, input, and card components"* and Claude will install packages and create all the component files for you.
 
 ### What is Shadcn UI?
 
@@ -388,6 +434,8 @@ You can find more components at [ui.shadcn.com](https://ui.shadcn.com). Popular 
 
 ## Part 5: Connecting to Supabase
 
+> **Claude Code Tip**: Tell Claude *"Set up Supabase with URL https://mydomain.com and anon key eyJ..."* and Claude will install the package, create the client file, and set up your .env files.
+
 ### Step 5.1: Install Supabase Client
 
 ```bash
@@ -454,6 +502,8 @@ export const supabase = createClient(
 ---
 
 ## Part 6: Setting Up Authentication
+
+> **Claude Code Tip**: Ask *"Create the auth context with sign up, sign in, and sign out functions"* and Claude will create the AuthContext file and LoginForm component.
 
 ### Step 6.1: Create Auth Context
 
@@ -1097,5 +1147,5 @@ Check the [Wiki Home](../WIKI.md) for the latest documentation.
 
 ---
 
-*Last updated: January 14, 2026*
+*Last updated: January 15, 2026*
 *Created with Claude Code assistance*
