@@ -9,8 +9,15 @@ const SnippetsSidePanel = ({ isOpen, onClose }) => {
   // Track if we've initialized expanded sections
   const initializedRef = useRef(false);
 
-  // Initialize with first 3 section IDs (handles both local and cloud IDs)
-  const [expandedSections, setExpandedSections] = useState(new Set([1, 2, 3]));
+  // Start with empty Set - will be initialized properly when config loads
+  const [expandedSections, setExpandedSections] = useState(() => {
+    // If activeConfig is available immediately, expand first 3 sections
+    if (activeConfig?.sections?.length > 0) {
+      initializedRef.current = true;
+      return new Set(activeConfig.sections.slice(0, 3).map(s => s.id));
+    }
+    return new Set();
+  });
   const [selectedSnippets, setSelectedSnippets] = useState([]);
   const [generatedNote, setGeneratedNote] = useState('');
   const [bfr, setBfr] = useState(350);
@@ -166,8 +173,8 @@ const SnippetsSidePanel = ({ isOpen, onClose }) => {
 
                 {isExpanded && (
                   <div className="snippet-category-body">
-                    {/* Weight & UF Calculator for section 1 */}
-                    {section.id === 1 && (
+                    {/* Weight & UF Calculator for Weight & UF Management section */}
+                    {(section.name === 'Weight & UF Management' || section.order === 0) && (
                       <div className="weight-calculator">
                         <div className="calc-input-group">
                           <label>Pre Weight (kg)</label>
@@ -229,7 +236,7 @@ const SnippetsSidePanel = ({ isOpen, onClose }) => {
                     )}
 
                     {/* BFR and UF Sliders for Treatment Initiated section */}
-                    {section.id === 3 && (
+                    {(section.name === 'Treatment Initiated' || section.order === 2) && (
                       <div className="sliders-section">
                         <div className="slider-group">
                           <label>
