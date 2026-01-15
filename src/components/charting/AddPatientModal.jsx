@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { usePatients } from '../../contexts/PatientContext';
 import { useTheme } from '../../contexts/ThemeContext';
 
-const AddPatientModal = ({ onClose }) => {
+const AddPatientModal = ({ onClose, onPatientAdded }) => {
   const { addPatient, activeShift, currentSection, sections } = usePatients();
   const { technicians } = useTheme();
 
@@ -36,13 +36,18 @@ const AddPatientModal = ({ onClose }) => {
       return;
     }
 
-    addPatient({
+    const newPatient = addPatient({
       ...formData,
       chair: formData.chair ? parseInt(formData.chair) : null,
       dryWeight: formData.dryWeight ? parseFloat(formData.dryWeight) : null
     });
 
-    onClose();
+    // Notify parent of the new patient ID so it can be selected
+    if (onPatientAdded && newPatient?.id) {
+      onPatientAdded(newPatient.id);
+    } else {
+      onClose();
+    }
   };
 
   return (

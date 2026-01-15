@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePatients } from '../../contexts/PatientContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useSave } from '../../contexts/SaveContext';
 import { useNotifications } from '../../contexts/NotificationContext';
 import { useAuth } from '../../contexts/AuthContext';
-import PatientCard from './PatientCard';
+import PatientTabs from './PatientTabs';
+import FullPatientChart from './FullPatientChart';
 import AddPatientModal from './AddPatientModal';
 import ExcelImportModal from './ExcelImportModal';
 import SnippetsSidePanel from './SnippetsSidePanel';
@@ -14,21 +15,42 @@ import { RealtimeCursors } from '../realtime-cursors';
 import './PatientCharting.css';
 
 const PatientCharting = () => {
-  const { patients, getFilteredPatients, activeShift, setActiveShift, selectedShifts, setSelectedShifts, isCloudConnected, lastCloudSync } = usePatients();
+  const { patients, getFilteredPatients, activeShift, setActiveShift, isCloudConnected } = usePatients();
   const { technicians } = useTheme();
-  const { saveAll, saveStatus, SAVE_STATUS, hasUnsavedChanges, lastSaved, autoSaveEnabled } = useSave();
-  const { summary: alertSummary, setShowNotificationPanel, SEVERITY } = useNotifications();
+  const { saveAll, saveStatus, SAVE_STATUS, lastSaved, autoSaveEnabled } = useSave();
+  const { summary: alertSummary, setShowNotificationPanel } = useNotifications();
   const { user, isAuthenticated } = useAuth();
 
   // Get username for realtime cursors
   const username = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Anonymous';
+
+  // Modal states
   const [showAddModal, setShowAddModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showSnippets, setShowSnippets] = useState(false);
   const [showQuickAssign, setShowQuickAssign] = useState(false);
   const [showQuickNotes, setShowQuickNotes] = useState(false);
-  const [quickNotesPatientId, setQuickNotesPatientId] = useState(null);
+
+  // Active patient tracking - this is KEY for Quick Notes and tabs
   const [activePatientId, setActivePatientId] = useState(null);
+
+  const filteredPatients = getFilteredPatients();
+
+  // Auto-select first patient when list changes or on initial load
+  useEffect(() => {
+    if (filteredPatients.length > 0) {
+      // If current active patient is not in filtered list, select first
+      const activeExists = filteredPatients.some(p => p.id === activePatientId);
+      if (!activePatientId || !activeExists) {
+        setActivePatientId(filteredPatients[0].id);
+      }
+    } else {
+      setActivePatientId(null);
+    }
+  }, [filteredPatients, activePatientId]);
+
+  // Get the currently active patient
+  const activePatient = filteredPatients.find(p => p.id === activePatientId);
 
   // Get alert button class based on severity
   const getAlertButtonClass = () => {
@@ -56,118 +78,129 @@ const PatientCharting = () => {
 
   const saveButton = getSaveButtonContent();
 
-  const filteredPatients = getFilteredPatients();
-
-  // Open Quick Notes for a specific patient
-  const openQuickNotes = (patientId = null) => {
-    // Use provided patientId, or activePatientId, or first patient
-    const targetId = patientId || activePatientId || (filteredPatients.length > 0 ? filteredPatients[0].id : null);
-    if (targetId) {
-      setQuickNotesPatientId(targetId);
+  // Open Quick Notes for active patient
+  const openQuickNotes = () => {
+    if (activePatientId) {
       setShowQuickNotes(true);
     }
   };
 
-  // Group patients by pod
-  const patientsByPod = {};
-  filteredPatients.forEach(patient => {
-    const pod = patient.pod || 'Unassigned';
-    if (!patientsByPod[pod]) {
-      patientsByPod[pod] = [];
+  // Handle patient added - select the new patient
+  const handlePatientAdded = (newPatientId) => {
+    setShowAddModal(false);
+    if (newPatientId) {
+      setActivePatientId(newPatientId);
     }
-    patientsByPod[pod].push(patient);
-  });
+  };
 
-  const pods = Object.keys(patientsByPod).sort();
+  // Calculate stats for shift overview
+  const chartClosedCount = filteredPatients.filter(p => p.qa?.chartClosed).length;
+  const unassignedCount = filteredPatients.filter(p => !p.tech || !p.chair).length;
 
   return (
     <div className="pt-charting-page active">
-      {/* Header */}
-      <div className="charting-header">
-        <div>
-          <h1 style={{ color: 'white', textShadow: '2px 2px 4px rgba(0,0,0,0.3)', marginBottom: '8px' }}>
-            HD Flowsheet & QA Tracker
-          </h1>
-          <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '14px' }}>
-            Active Shift: {activeShift} | Patients: {filteredPatients.length} | Technicians: {technicians.length}
-            {isCloudConnected && (
-              <span style={{ marginLeft: '12px', background: 'rgba(16, 185, 129, 0.3)', padding: '2px 8px', borderRadius: '4px' }}>
-                ☁️ Cloud Synced
-              </span>
-            )}
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button
-            className="import-excel-btn"
-            onClick={() => setShowImportModal(true)}
-          >
-            📊 Import Excel
-          </button>
-          <button
-            className="add-patient-btn"
-            onClick={() => setShowAddModal(true)}
-          >
-            + Add Patient
-          </button>
+      {/* Shift Overview Header */}
+      <div className="shift-overview">
+        <h2>📊 Shift Overview</h2>
+        <div className="shift-stats">
+          <div className="stat-card blue">
+            <span className="stat-label">Total Patients</span>
+            <span className="stat-value">{filteredPatients.length}</span>
+          </div>
+          <div className="stat-card red">
+            <span className="stat-label">Time Alerts</span>
+            <span className="stat-value">{alertSummary.warning || 0}</span>
+          </div>
+          <div className="stat-card orange">
+            <span className="stat-label">Weight Alerts</span>
+            <span className="stat-value">{alertSummary.critical || 0}</span>
+          </div>
+          <div className="stat-card green">
+            <span className="stat-label">Complete</span>
+            <span className="stat-value">{chartClosedCount}/{filteredPatients.length}</span>
+          </div>
         </div>
       </div>
 
       {/* Shift Tabs */}
       <div className="shift-tabs">
-        {['1st', '2nd', '3rd'].map(shift => (
+        <span className="shift-label">Shift:</span>
+        {['1st', '2nd'].map(shift => (
           <button
             key={shift}
             className={`shift-tab ${activeShift === shift ? 'active' : ''}`}
             onClick={() => setActiveShift(shift)}
           >
-            {shift} Shift
+            {shift}
             <span className="shift-count">
-              ({patients.filter(p => p.shift === shift || !p.shift).length})
+              {patients.filter(p => p.shift === shift || !p.shift).length}
             </span>
           </button>
         ))}
       </div>
 
-      {/* Pod Tabs */}
-      {pods.length > 0 && (
-        <div className="pod-tabs">
-          {pods.map(pod => (
-            <button
-              key={pod}
-              className="pod-tab"
-              onClick={() => {
-                const firstPatient = patientsByPod[pod][0];
-                setActivePatientId(firstPatient.id);
-              }}
-            >
-              {pod}
-              <span className="pod-count">({patientsByPod[pod].length})</span>
-            </button>
-          ))}
+      {/* Unassigned Warning */}
+      {unassignedCount > 0 && (
+        <div className="unassigned-warning">
+          <span className="warning-icon">⚠️</span>
+          <span>Unassigned:</span>
+          <span className="warning-count">{unassignedCount} pts</span>
+          <span className="warning-alert">⚠ 1</span>
         </div>
       )}
 
-      {/* Patient Cards */}
-      <div className="patients-container">
-        {filteredPatients.length === 0 ? (
+      {/* Patient Tabs - One per patient */}
+      <PatientTabs
+        patients={filteredPatients}
+        activePatientId={activePatientId}
+        onPatientSelect={setActivePatientId}
+        onAddPatient={() => setShowAddModal(true)}
+      />
+
+      {/* Full Patient Chart - Shows active patient's full chart */}
+      <div className="patient-chart-container">
+        {activePatient ? (
+          <FullPatientChart
+            patient={activePatient}
+            onOpenQuickNotes={() => openQuickNotes()}
+          />
+        ) : (
           <div className="empty-state">
             <div className="empty-icon">🏥</div>
             <h3>No Patients Yet</h3>
-            <p>Click "Add Patient" to get started</p>
-          </div>
-        ) : (
-          <div className="patients-grid">
-            {filteredPatients.map(patient => (
-              <PatientCard key={patient.id} patient={patient} />
-            ))}
+            <p>Click "+ Add" in the tabs above to add your first patient</p>
+            <button
+              className="add-first-patient-btn"
+              onClick={() => setShowAddModal(true)}
+            >
+              + Add Patient
+            </button>
           </div>
         )}
       </div>
 
+      {/* Import/Export Bar */}
+      <div className="import-export-bar">
+        <button className="action-btn" onClick={() => setShowImportModal(true)}>
+          📥 Import/Re-import Patient Orders
+        </button>
+        <button className="action-btn">
+          ☁️ Load from Server
+        </button>
+        <button className="action-btn">
+          📤 Export to File
+        </button>
+        <button className="action-btn">
+          📥 Import from File
+        </button>
+      </div>
+
       {/* Add Patient Modal */}
       {showAddModal && (
-        <AddPatientModal onClose={() => setShowAddModal(false)} />
+        <AddPatientModal
+          onClose={() => setShowAddModal(false)}
+          onPatientAdded={handlePatientAdded}
+        />
       )}
 
       {/* Excel Import Modal */}
@@ -188,14 +221,14 @@ const PatientCharting = () => {
         onClose={() => setShowQuickAssign(false)}
       />
 
-      {/* Quick Notes Modal - Per-patient notes (matches HDFlowsheet reference) */}
+      {/* Quick Notes Modal - Uses activePatientId */}
       <QuickNotesModal
         isOpen={showQuickNotes}
         onClose={() => setShowQuickNotes(false)}
-        patientId={quickNotesPatientId}
+        patientId={activePatientId}
       />
 
-      {/* Floating Buttons - Top Right (matches HDFlowsheet structure) */}
+      {/* Floating Buttons - Top Right */}
       <div className="floating-buttons">
         <button
           className={`floating-btn ${getAlertButtonClass()}`}
@@ -207,7 +240,7 @@ const PatientCharting = () => {
           )}
         </button>
         <button
-          className="floating-btn"
+          className="floating-btn charting-btn"
           onClick={() => setShowSnippets(!showSnippets)}
         >
           📋 Charting
@@ -220,7 +253,8 @@ const PatientCharting = () => {
         </button>
         <button
           className="floating-btn"
-          onClick={() => openQuickNotes()}
+          onClick={openQuickNotes}
+          disabled={!activePatientId}
         >
           📝 Quick Notes
         </button>
@@ -233,16 +267,25 @@ const PatientCharting = () => {
         </button>
       </div>
 
-      {/* Auto-save indicator */}
-      {autoSaveEnabled && (
-        <div className="autosave-indicator">
-          {lastSaved ? (
-            <span>Auto-save: {lastSaved.toLocaleTimeString()}</span>
-          ) : (
-            <span>Auto-save enabled</span>
+      {/* Auto-save indicator - Bottom Left */}
+      <div className="autosave-indicator">
+        <div className="save-info">
+          <span className="save-icon">💾</span>
+          <span className="save-label">Save All</span>
+          {lastSaved && (
+            <span className="last-saved">Last saved: {lastSaved.toLocaleTimeString()}</span>
           )}
         </div>
-      )}
+        <label className="autosave-toggle">
+          <input type="checkbox" checked={autoSaveEnabled} readOnly />
+          Auto-save
+        </label>
+        {isCloudConnected && (
+          <span className="cloud-indicator">☁️ Synced</span>
+        )}
+        <button className="refresh-btn">🔄 Refresh App</button>
+        <button className="hide-btn">▲ Hide</button>
+      </div>
 
       {/* Realtime Cursors - Show team member cursors */}
       {isAuthenticated && (
