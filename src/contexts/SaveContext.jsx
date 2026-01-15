@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { usePatients } from './PatientContext';
 import { useOperations } from './OperationsContext';
 import { useSnippets } from './SnippetContext';
@@ -19,8 +19,7 @@ const SAVE_STATUS = {
   IDLE: 'idle',
   SAVING: 'saving',
   SAVED: 'saved',
-  ERROR: 'error',
-  UNSAVED: 'unsaved'
+  ERROR: 'error'
 };
 
 export const SaveProvider = ({ children }) => {
@@ -36,108 +35,29 @@ export const SaveProvider = ({ children }) => {
   });
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(() => {
     const saved = localStorage.getItem('hd-autosave-enabled');
-    return saved !== 'false'; // Default to true
+    return saved !== 'false';
   });
   const [autoSaveInterval, setAutoSaveInterval] = useState(() => {
     const saved = localStorage.getItem('hd-autosave-interval');
-    return saved ? parseInt(saved) : 60000; // Default 60 seconds
+    return saved ? parseInt(saved) : 60000;
   });
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  const autoSaveTimerRef = useRef(null);
-  const lastSavedDataRef = useRef(null);
+  // Track data changes to know when to update lastSaved
+  const dataSignature = useMemo(() => {
+    return JSON.stringify({ patients, checklists, configurations, theme, technicians });
+  }, [patients, checklists, configurations, theme, technicians]);
 
-  // Generate a hash of current data to detect changes
-  const getCurrentDataHash = useCallback(() => {
-    const data = {
-      patients,
-      checklists,
-      labs,
-      completions,
-      configurations,
-      activeConfigId,
-      theme,
-      technicians
-    };
-    return JSON.stringify(data);
-  }, [patients, checklists, labs, completions, configurations, activeConfigId, theme, technicians]);
+  const prevSignatureRef = useRef(dataSignature);
 
-  // Check for unsaved changes
+  // Update lastSaved when data changes (contexts auto-save to localStorage)
   useEffect(() => {
-    const currentHash = getCurrentDataHash();
-    if (lastSavedDataRef.current && lastSavedDataRef.current !== currentHash) {
-      setHasUnsavedChanges(true);
-      setSaveStatus(SAVE_STATUS.UNSAVED);
-    }
-  }, [getCurrentDataHash]);
-
-  // Save all data to localStorage
-  const saveAll = useCallback(async () => {
-    setSaveStatus(SAVE_STATUS.SAVING);
-
-    try {
-      // Small delay for visual feedback
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      // Save all data (contexts already auto-save, but we ensure it here)
-      localStorage.setItem('hd-patients', JSON.stringify(patients));
-      localStorage.setItem('hd-checklists', JSON.stringify(checklists));
-      localStorage.setItem('hd-labs', JSON.stringify(labs));
-      localStorage.setItem('hd-checklist-completions', JSON.stringify(completions));
-      localStorage.setItem('hd-snippet-configs', JSON.stringify(configurations));
-      localStorage.setItem('hd-active-snippet-config', activeConfigId?.toString() || '');
-      localStorage.setItem('hd-theme', theme);
-      localStorage.setItem('hd-technicians', JSON.stringify(technicians));
-
-      // Update last saved
+    if (prevSignatureRef.current !== dataSignature) {
       const now = new Date();
       localStorage.setItem('hd-last-saved', now.toISOString());
       setLastSaved(now);
-
-      // Update hash reference
-      lastSavedDataRef.current = getCurrentDataHash();
-      setHasUnsavedChanges(false);
-
-      setSaveStatus(SAVE_STATUS.SAVED);
-
-      // Reset to idle after showing saved status
-      setTimeout(() => {
-        setSaveStatus(SAVE_STATUS.IDLE);
-      }, 2000);
-
-      return { success: true };
-    } catch (error) {
-      console.error('Save failed:', error);
-      setSaveStatus(SAVE_STATUS.ERROR);
-
-      setTimeout(() => {
-        setSaveStatus(SAVE_STATUS.UNSAVED);
-      }, 3000);
-
-      return { success: false, error };
+      prevSignatureRef.current = dataSignature;
     }
-  }, [patients, checklists, labs, completions, configurations, activeConfigId, theme, technicians, getCurrentDataHash]);
-
-  // Auto-save functionality
-  useEffect(() => {
-    if (autoSaveEnabled && hasUnsavedChanges) {
-      // Clear existing timer
-      if (autoSaveTimerRef.current) {
-        clearTimeout(autoSaveTimerRef.current);
-      }
-
-      // Set new timer
-      autoSaveTimerRef.current = setTimeout(() => {
-        saveAll();
-      }, autoSaveInterval);
-    }
-
-    return () => {
-      if (autoSaveTimerRef.current) {
-        clearTimeout(autoSaveTimerRef.current);
-      }
-    };
-  }, [autoSaveEnabled, hasUnsavedChanges, autoSaveInterval, saveAll]);
+  }, [dataSignature]);
 
   // Persist auto-save settings
   useEffect(() => {
@@ -148,31 +68,29 @@ export const SaveProvider = ({ children }) => {
     localStorage.setItem('hd-autosave-interval', autoSaveInterval.toString());
   }, [autoSaveInterval]);
 
-  // Initialize lastSavedDataRef on mount
-  useEffect(() => {
-    lastSavedDataRef.current = getCurrentDataHash();
+  // Manual save button (just shows feedback - data is already auto-saved by each context)
+  const saveAll = useCallback(async () => {
+    setSaveStatus(SAVE_STATUS.SAVING);
+
+    try {
+      // Brief delay for visual feedback
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      const now = new Date();
+      localStorage.setItem('hd-last-saved', now.toISOString());
+      setLastSaved(now);
+
+      setSaveStatus(SAVE_STATUS.SAVED);
+      setTimeout(() => setSaveStatus(SAVE_STATUS.IDLE), 2000);
+
+      return { success: true };
+    } catch (error) {
+      console.error('Save failed:', error);
+      setSaveStatus(SAVE_STATUS.ERROR);
+      setTimeout(() => setSaveStatus(SAVE_STATUS.IDLE), 3000);
+      return { success: false, error };
+    }
   }, []);
-
-  // Save before page unload if there are unsaved changes
-  useEffect(() => {
-    const handleBeforeUnload = (e) => {
-      if (hasUnsavedChanges) {
-        // Trigger a synchronous save
-        localStorage.setItem('hd-patients', JSON.stringify(patients));
-        localStorage.setItem('hd-checklists', JSON.stringify(checklists));
-        localStorage.setItem('hd-labs', JSON.stringify(labs));
-        localStorage.setItem('hd-checklist-completions', JSON.stringify(completions));
-        localStorage.setItem('hd-snippet-configs', JSON.stringify(configurations));
-        localStorage.setItem('hd-active-snippet-config', activeConfigId?.toString() || '');
-        localStorage.setItem('hd-theme', theme);
-        localStorage.setItem('hd-technicians', JSON.stringify(technicians));
-        localStorage.setItem('hd-last-saved', new Date().toISOString());
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [hasUnsavedChanges, patients, checklists, labs, completions, configurations, activeConfigId, theme, technicians]);
 
   // Export all data as JSON
   const exportAllData = useCallback(() => {
@@ -212,8 +130,6 @@ export const SaveProvider = ({ children }) => {
       localStorage.removeItem('hd-technicians');
       localStorage.removeItem('hd-last-saved');
       localStorage.removeItem('hd-next-id');
-
-      // Reload the page to reset all contexts
       window.location.reload();
     }
   }, []);
@@ -222,7 +138,6 @@ export const SaveProvider = ({ children }) => {
     // Status
     saveStatus,
     SAVE_STATUS,
-    hasUnsavedChanges,
     lastSaved,
 
     // Actions
@@ -230,7 +145,7 @@ export const SaveProvider = ({ children }) => {
     exportAllData,
     clearAllData,
 
-    // Auto-save settings
+    // Auto-save settings (kept for settings UI)
     autoSaveEnabled,
     setAutoSaveEnabled,
     autoSaveInterval,

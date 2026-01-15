@@ -69,8 +69,6 @@ const PatientCharting = () => {
         return { text: '✓ Saved!', className: 'saved' };
       case SAVE_STATUS.ERROR:
         return { text: '❌ Error', className: 'error' };
-      case SAVE_STATUS.UNSAVED:
-        return { text: '💾 Save All •', className: 'unsaved' };
       default:
         return { text: '💾 Save All', className: '' };
     }
