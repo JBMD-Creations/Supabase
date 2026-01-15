@@ -1,6 +1,6 @@
 import { cn } from '../lib/utils'
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import type { ChatMessage } from '../hooks/use-realtime-chat'
+import './chat-message.css'
 
 interface ChatMessageItemProps {
   message: ChatMessage
@@ -16,26 +16,22 @@ export const ChatMessageItem = ({ message, isOwnMessage, showHeader }: ChatMessa
     ?.toUpperCase()
 
   return (
-    <div className={cn('flex gap-3', isOwnMessage && 'flex-row-reverse')}>
+    <div className={cn('chat-message-row', isOwnMessage && 'chat-message-own')}>
       {showHeader && (
-        <Avatar className="size-8 shrink-0">
-          {message.user.image && <AvatarImage src={message.user.image} alt={message.user.name} />}
-          <AvatarFallback>{initials || '?'}</AvatarFallback>
-        </Avatar>
-      )}
-      {!showHeader && <div className="size-8 shrink-0" />}
-      <div className={cn('flex flex-col gap-1', isOwnMessage && 'items-end')}>
-        {showHeader && (
-          <span className="text-xs text-muted-foreground">{message.user.name}</span>
-        )}
-        <div
-          className={cn(
-            'rounded-lg px-3 py-2 text-sm max-w-[280px] break-words',
-            isOwnMessage
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-muted text-foreground'
+        <div className="chat-avatar">
+          {message.user.image ? (
+            <img src={message.user.image} alt={message.user.name} className="chat-avatar-img" />
+          ) : (
+            <span className="chat-avatar-fallback">{initials || '?'}</span>
           )}
-        >
+        </div>
+      )}
+      {!showHeader && <div className="chat-avatar-spacer" />}
+      <div className={cn('chat-message-content', isOwnMessage && 'chat-message-content-own')}>
+        {showHeader && (
+          <span className="chat-message-username">{message.user.name}</span>
+        )}
+        <div className={cn('chat-message-bubble', isOwnMessage && 'chat-message-bubble-own')}>
           {message.content}
         </div>
       </div>
